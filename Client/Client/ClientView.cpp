@@ -1,4 +1,4 @@
-
+﻿
 // ClientView.cpp : implementation of the CClientView class
 //
 
@@ -13,6 +13,7 @@
 #include "ClientDoc.h"
 #include "ClientView.h"
 #include "ClientDlg.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,6 +32,13 @@ BEGIN_MESSAGE_MAP(CClientView, CView)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 	ON_COMMAND(ID_CONNECT_CONNECTTOSERVER, &CClientView::OnConnectConnectToServer)
+	ON_WM_CREATE()
+	ON_BN_CLICKED(IDC_BN_CONN, OnButtonConnectClicked)
+	ON_BN_CLICKED(IDC_BN_SAPP, OnButtonShowAppClicked)
+	ON_BN_CLICKED(IDC_BN_SPRO, OnButtonShowProcessClicked)
+	ON_BN_CLICKED(IDC_BN_CSCR, OnButtonCapScreenClicked)
+	ON_BN_CLICKED(IDC_BN_KSTR, OnButtonKeystrokeClicked)
+	ON_BN_CLICKED(IDC_BN_BDIR, OnButtonBrowseDirClicked)
 END_MESSAGE_MAP()
 
 // CClientView construction/destruction
@@ -155,3 +163,123 @@ void CClientView::AddMsg(CString strMessage)
 	Invalidate();
 }
 
+
+
+int CClientView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CView::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  Add your specialized creation code here
+	m_button[0].Create("CONNECT", BS_PUSHBUTTON,
+		CRect(300, 100, 580, 150), this, IDC_BN_CONN);
+	m_button[1].Create("SHOW APPLICATIONS", BS_PUSHBUTTON,
+		CRect(600, 100, 880, 150), this, IDC_BN_SAPP);
+	m_button[2].Create("SHOW PROCESSES", BS_PUSHBUTTON,
+		CRect(900, 100, 1180, 150), this, IDC_BN_SPRO);
+	m_button[3].Create("CAPTURE SCREEN", BS_PUSHBUTTON,
+		CRect(300, 300, 580, 350), this, IDC_BN_CSCR);
+	m_button[4].Create("KEYSTROKE", BS_PUSHBUTTON,
+		CRect(600, 300, 880, 350), this, IDC_BN_KSTR);
+	m_button[5].Create("BROWSE DIRECTORY", BS_PUSHBUTTON,
+		CRect(900, 300, 1180, 350), this, IDC_BN_BDIR);
+
+	for (int i = 0; i < 6; i++)
+		m_button[i].ShowWindow(SW_SHOW);
+	return 0;
+}
+
+
+void CClientView::OnButtonConnectClicked()
+{
+	//AfxMessageBox("Connect.");
+	// làm cái gì đó cho hộp thoại hiện ra, nếu connect được thì đổi flag từ false thành true
+	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	{
+		CClientDlg dlgConnect;
+		CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+		dlgConnect.DoModal();
+	}
+	else
+	{
+		((CClientApp*)AfxGetApp())->m_isConnected = FALSE;
+		((CClientApp*)AfxGetApp())->m_pClientView->m_button[0].SetWindowText("CONNECT");
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Close();
+		AfxMessageBox("Disconnected from the server!");
+	}
+
+		
+
+	Invalidate();
+	UpdateWindow();
+}
+
+void CClientView::OnButtonShowAppClicked()
+{
+	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	{
+		AfxMessageBox("Client hasn't been connected to server!");
+	}
+	else
+	{
+
+	}
+	Invalidate();
+	UpdateWindow();
+}
+
+void CClientView::OnButtonShowProcessClicked()
+{
+	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	{
+		AfxMessageBox("Client hasn't been connected to server!");
+	}
+	else
+	{
+
+	}
+	Invalidate();
+	UpdateWindow();
+}
+
+void CClientView::OnButtonCapScreenClicked()
+{
+	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	{
+		AfxMessageBox("Client hasn't been connected to server!");
+	}
+	else
+	{
+
+	}
+	Invalidate();
+	UpdateWindow();
+}
+
+void CClientView::OnButtonKeystrokeClicked()
+{
+	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	{
+		AfxMessageBox("Client hasn't been connected to server!");
+	}
+	else
+	{
+
+	}
+	Invalidate();
+	UpdateWindow();
+}
+
+void CClientView::OnButtonBrowseDirClicked()
+{
+	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	{
+		AfxMessageBox("Client hasn't been connected to server!");
+	}
+	else
+	{
+
+	}
+	Invalidate();
+	UpdateWindow();
+}

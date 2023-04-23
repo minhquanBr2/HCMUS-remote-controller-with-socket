@@ -7,6 +7,7 @@
 #include "ClientDoc.h"
 
 
+
 class CClientView : public CView
 {
 protected: // create from serialization only
@@ -45,10 +46,20 @@ protected:
 	afx_msg void OnFilePrintPreview();
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnButtonConnectClicked();
+	afx_msg void OnButtonShowAppClicked();
+	afx_msg void OnButtonShowProcessClicked();
+	afx_msg void OnButtonCapScreenClicked();
+	afx_msg void OnButtonKeystrokeClicked();
+	afx_msg void OnButtonBrowseDirClicked();
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnConnectConnectToServer();
 	void AddMsg(CString strMessage);
+public:
+	CButton m_button[6];
+public:
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
 #ifndef _DEBUG  // debug version in ClientView.cpp

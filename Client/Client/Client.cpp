@@ -147,6 +147,8 @@ BOOL CClientApp::InitInstance()
 	m_pMainWnd->SetWindowText("Client");
 	m_pMainWnd->UpdateWindow();
 
+	m_ClientSocket.Create();
+
 	CClientDlg dlg; // instance of dialog
 	INT_PTR nResponse = dlg.DoModal(); // get the response from your modal dialog 
 	return TRUE;

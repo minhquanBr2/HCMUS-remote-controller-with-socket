@@ -92,15 +92,22 @@
 #define IDC_PORT                        1003
 #define IDC_MESSAGE                     1004
 #define IDC_SEND                        1005
+#define IDC_BUTTON1						1006
+#define IDC_BN_CONN                     1007
+#define IDC_BN_SAPP						1008
+#define IDC_BN_SPRO						1009
+#define IDC_BN_CSCR						1010
+#define IDC_BN_KSTR						1011
+#define IDC_BN_BDIR						1012
 #define ID_CONNECT_CONNECTTOSERVER      32771
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        314
+#define _APS_NEXT_RESOURCE_VALUE        315
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1006
+#define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

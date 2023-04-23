@@ -22,6 +22,7 @@ public:
 	CClientApp() noexcept;
 	CClientView* m_pClientView;
 	CClientSocket m_ClientSocket;
+	bool m_isConnected = FALSE;
 
 
 // Overrides

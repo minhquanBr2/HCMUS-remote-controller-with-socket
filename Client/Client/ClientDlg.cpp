@@ -6,6 +6,7 @@
 #include "Client.h"
 #include "ClientDlg.h"
 #include "ClientSocket.h"
+#include "ClientView.h"
 #include "afxwin.h"
 #include "afxdialogex.h"
 
@@ -63,17 +64,17 @@ void CClientDlg::OnBnClickedConnect()
 	// TODO: Add your control notification handler code here
 	// Connecting the client to server
 	UpdateData(TRUE);
-	((CClientApp*)AfxGetApp())->m_ClientSocket.Create();
 	if (((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(m_strIPAddress, m_iPort))
 	{
 		AfxMessageBox("Successfully connected to server!");
+		((CClientApp*)AfxGetApp())->m_isConnected = TRUE;
+		((CClientApp*)AfxGetApp())->m_pClientView->m_button[0].SetWindowText("DISCONNECT");
 		CClientDlg::OnCancel();
 	}
 	else
 	{
 		AfxMessageBox("Failed to connected to server!");
 	}
-
 	DWORD error = GetLastError();
 }
 
