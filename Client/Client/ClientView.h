@@ -4,6 +4,13 @@
 
 #pragma once
 
+#define CONN 0
+#define SAPP 1
+#define SPRO 2
+#define CSCR 3
+#define KSTR 4
+#define BDIR 5
+
 #include "ClientDoc.h"
 
 
@@ -17,6 +24,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
+	CButton m_button[6];
 	CClientDoc* GetDocument() const;
 
 // Operations
@@ -46,6 +54,7 @@ protected:
 	afx_msg void OnFilePrintPreview();
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnButtonConnectClicked();
 	afx_msg void OnButtonShowAppClicked();
 	afx_msg void OnButtonShowProcessClicked();
@@ -54,12 +63,10 @@ protected:
 	afx_msg void OnButtonBrowseDirClicked();
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnConnectConnectToServer();
+	//afx_msg void OnConnectConnectToServer();
 	void AddMsg(CString strMessage);
-public:
-	CButton m_button[6];
-public:
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	void InitButtons();
+	void UpdateButtons();	
 };
 
 #ifndef _DEBUG  // debug version in ClientView.cpp

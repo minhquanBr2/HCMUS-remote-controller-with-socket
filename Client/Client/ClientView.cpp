@@ -31,7 +31,6 @@ BEGIN_MESSAGE_MAP(CClientView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CClientView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
-	ON_COMMAND(ID_CONNECT_CONNECTTOSERVER, &CClientView::OnConnectConnectToServer)
 	ON_WM_CREATE()
 	ON_BN_CLICKED(IDC_BN_CONN, OnButtonConnectClicked)
 	ON_BN_CLICKED(IDC_BN_SAPP, OnButtonShowAppClicked)
@@ -148,13 +147,13 @@ CClientDoc* CClientView::GetDocument() const // non-debug version is inline
 // CClientView message handlers
 
 
-void CClientView::OnConnectConnectToServer()
-{
-	// TODO: Add your command handler code here
-	CClientDlg dlgConnect;
-	dlgConnect.DoModal();
-
-}
+//void CClientView::OnConnectConnectToServer()
+//{
+//	// TODO: Add your command handler code here
+//	CClientDlg dlgConnect;
+//	dlgConnect.DoModal();
+//
+//}
 
 void CClientView::AddMsg(CString strMessage)
 {
@@ -193,17 +192,17 @@ int CClientView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CClientView::OnButtonConnectClicked()
 {
 	//AfxMessageBox("Connect.");
-	// làm cái gì đó cho hộp thoại hiện ra, nếu connect được thì đổi flag từ false thành true
 	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
 	{
 		CClientDlg dlgConnect;
-		CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+		//CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
 		dlgConnect.DoModal();
 	}
 	else
 	{
 		((CClientApp*)AfxGetApp())->m_isConnected = FALSE;
-		((CClientApp*)AfxGetApp())->m_pClientView->m_button[0].SetWindowText("CONNECT");
+		this->m_button[CONN].SetWindowText("CONNECT");
+		this->UpdateButtons();
 		((CClientApp*)AfxGetApp())->m_ClientSocket.Close();
 		AfxMessageBox("Disconnected from the server!");
 	}
@@ -282,4 +281,20 @@ void CClientView::OnButtonBrowseDirClicked()
 	}
 	Invalidate();
 	UpdateWindow();
+}
+
+void CClientView::InitButtons()
+{
+	for (int i = SAPP; i <= BDIR; i++)
+		m_button[i].EnableWindow(FALSE);
+}
+
+void CClientView::UpdateButtons()
+{
+	if (((CClientApp*)AfxGetApp())->m_isConnected == TRUE)
+		for (int i = SAPP; i <= BDIR; i++)
+			m_button[i].EnableWindow(TRUE);
+	else
+		for (int i = SAPP; i <= BDIR; i++)
+			m_button[i].EnableWindow(FALSE);
 }

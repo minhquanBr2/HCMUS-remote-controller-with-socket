@@ -64,11 +64,13 @@ void CClientDlg::OnBnClickedConnect()
 	// TODO: Add your control notification handler code here
 	// Connecting the client to server
 	UpdateData(TRUE);
-	if (((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(m_strIPAddress, m_iPort))
+	if (((CClientApp*)AfxGetApp())->m_ClientSocket.Create() &&
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(m_strIPAddress, m_iPort))
 	{
 		AfxMessageBox("Successfully connected to server!");
 		((CClientApp*)AfxGetApp())->m_isConnected = TRUE;
-		((CClientApp*)AfxGetApp())->m_pClientView->m_button[0].SetWindowText("DISCONNECT");
+		((CClientApp*)AfxGetApp())->m_pClientView->m_button[CONN].SetWindowText("DISCONNECT");
+		((CClientApp*)AfxGetApp())->m_pClientView->UpdateButtons();
 		CClientDlg::OnCancel();
 	}
 	else

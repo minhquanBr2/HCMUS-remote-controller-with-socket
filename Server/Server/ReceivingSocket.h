@@ -8,6 +8,7 @@ public:
 	CReceivingSocket();
 	virtual ~CReceivingSocket();
 	virtual void OnReceive(int nErrorCode);
+	virtual void OnClose(int nErrorCode);
 };
 
 

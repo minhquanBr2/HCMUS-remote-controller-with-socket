@@ -42,3 +42,12 @@ void CReceivingSocket::OnReceive(int nErrorCode)
 	((CServerApp*)AfxGetApp())->m_pServerView->AddMsg(strRec);
 	CSocket::OnReceive(nErrorCode);
 }
+
+
+void CReceivingSocket::OnClose(int nErrorCode)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	AfxMessageBox("Connection Closed!");
+	Close();
+	CSocket::OnClose(nErrorCode);
+}
