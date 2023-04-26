@@ -183,6 +183,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CapScreenDlg.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientDlg.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="ClientView.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="KeystrokeDlg.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="pch.h" />
@@ -200,6 +202,7 @@
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CapScreenDlg.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientDlg.cpp" />
@@ -207,6 +210,7 @@
     <ClCompile Include="ClientSocket.cpp" />
     <ClCompile Include="ClientView.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="KeystrokeDlg.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="pch.cpp">

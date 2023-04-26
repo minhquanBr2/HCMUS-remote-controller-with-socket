@@ -1,1 +1,1 @@
-void screenCapture();
+int ScreenCapture();

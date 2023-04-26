@@ -10,6 +10,8 @@
 #include "afxwin.h"
 #include "afxdialogex.h"
 
+#include <string>
+
 
 // CClientDlg dialog
 
@@ -41,7 +43,6 @@ BEGIN_MESSAGE_MAP(CClientDlg, CDialog)
 	ON_EN_CHANGE(IDC_MESSAGE, &CClientDlg::OnEnChangeMessage)
 	ON_BN_CLICKED(IDC_CONNECT, &CClientDlg::OnBnClickedConnect)
 	ON_BN_CLICKED(IDCANCEL, &CClientDlg::OnBnClickedCancel)
-	ON_BN_CLICKED(IDC_SEND, &CClientDlg::OnBnClickedSend)
 END_MESSAGE_MAP()
 
 
@@ -68,6 +69,9 @@ void CClientDlg::OnBnClickedConnect()
 		((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(m_strIPAddress, m_iPort))
 	{
 		AfxMessageBox("Successfully connected to server!");
+
+		// for testing
+
 		((CClientApp*)AfxGetApp())->m_isConnected = TRUE;
 		((CClientApp*)AfxGetApp())->m_pClientView->m_button[CONN].SetWindowText("DISCONNECT");
 		((CClientApp*)AfxGetApp())->m_pClientView->UpdateButtons();
@@ -88,17 +92,17 @@ void CClientDlg::OnBnClickedCancel()
 }
 
 
-void CClientDlg::OnBnClickedSend()
-{
-	// TODO: Add your control notification handler code here
-	// Sending the client to server
-	UpdateData(TRUE);
-	if (((CClientApp*)AfxGetApp())->m_ClientSocket.Send(m_strMessage.GetBuffer(m_strMessage.GetLength()), m_strMessage.GetLength()))
-	{
-		AfxMessageBox("Message sent successfully!");
-	}
-	else
-	{
-		AfxMessageBox("Failed to send message!");
-	}
-}
+//void CClientDlg::OnBnClickedSend()
+//{
+//	// TODO: Add your control notification handler code here
+//	// Sending the client to server
+//	UpdateData(TRUE);
+//	if (((CClientApp*)AfxGetApp())->m_ClientSocket.Send(m_strMessage.GetBuffer(m_strMessage.GetLength()), m_strMessage.GetLength()))
+//	{
+//		AfxMessageBox("Message sent successfully!");
+//	}
+//	else
+//	{
+//		AfxMessageBox("Failed to send message!");
+//	}
+//}

@@ -6,59 +6,60 @@
 #include <iostream>
 #include <fstream>
 
-void screenCapture()
+
+int ScreenCapture() 
 {
-    HDC hdcScreen = GetDC(NULL);
-    HDC hdcMemDC = CreateCompatibleDC(hdcScreen);
-    int width = GetSystemMetrics(SM_CXSCREEN);
-    int height = GetSystemMetrics(SM_CYSCREEN);
-    HBITMAP hBitmap = CreateCompatibleBitmap(hdcScreen, width, height);
-    HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMemDC, hBitmap);
+    // Get the dimensions of the primary display
+    DEVMODE dm = { 0 };
+    dm.dmSize = sizeof(dm);
+    EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm);
+    int width = dm.dmPelsWidth;
+    int height = dm.dmPelsHeight;
 
-    BitBlt(hdcMemDC, 0, 0, width, height, hdcScreen, 0, 0, SRCCOPY);
+    // Create a device context for the primary display
+    HDC hScreen = GetDC(NULL);
+    HDC hDC = CreateCompatibleDC(hScreen);
 
-    std::ofstream file("screenshot.bmp", std::ios::binary);
-    BITMAPINFOHEADER bmpInfoHeader;
+    // Create a bitmap compatible with the primary display
+    HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, width, height);
+    HBITMAP hOldBitmap = (HBITMAP)SelectObject(hDC, hBitmap);
+
+    // Copy the contents of the primary display to the bitmap
+    BitBlt(hDC, 0, 0, width, height, hScreen, 0, 0, SRCCOPY);
+
+    // Save the bitmap to a BMP file
+    const char* filename = "screenshot.bmp";
+    BITMAPINFOHEADER bmpInfoHeader = { 0 };
     bmpInfoHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmpInfoHeader.biWidth = width;
-    bmpInfoHeader.biHeight = height;
+    bmpInfoHeader.biHeight = -height;
     bmpInfoHeader.biPlanes = 1;
     bmpInfoHeader.biBitCount = 24;
     bmpInfoHeader.biCompression = BI_RGB;
-    bmpInfoHeader.biSizeImage = 0;
-    bmpInfoHeader.biXPelsPerMeter = 0;
-    bmpInfoHeader.biYPelsPerMeter = 0;
-    bmpInfoHeader.biClrUsed = 0;
-    bmpInfoHeader.biClrImportant = 0;
+    bmpInfoHeader.biSizeImage = ((width * bmpInfoHeader.biBitCount + 31) / 32) * 4 * height;
 
-    BITMAPFILEHEADER bmfHeader;
-    bmfHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + bmpInfoHeader.biSize;
-    bmfHeader.bfSize = bmfHeader.bfOffBits + (width * height * 3);
-    bmfHeader.bfType = 0x4d42;
+    BITMAPFILEHEADER bmpFileHeader = { 0 };
+    bmpFileHeader.bfType = 'MB';
+    bmpFileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+    bmpFileHeader.bfSize = bmpFileHeader.bfOffBits + bmpInfoHeader.biSizeImage;
 
-    file.write((char*)&bmfHeader, sizeof(BITMAPFILEHEADER));
-    file.write((char*)&bmpInfoHeader, sizeof(BITMAPINFOHEADER));
+    std::ofstream outputFile(filename, std::ios::out | std::ios::binary);
+    outputFile.write(reinterpret_cast<const char*>(&bmpFileHeader), sizeof(BITMAPFILEHEADER));
+    outputFile.write(reinterpret_cast<const char*>(&bmpInfoHeader), sizeof(BITMAPINFOHEADER));
 
-    int bytesPerRow = ((width * 3 + 3) & ~3);
-    char* buffer = new char[bytesPerRow];
-    for (int y = height - 1; y >= 0; y--)
-    {
-        char* row = (char*)hBitmap + y * bytesPerRow;
-        for (int x = 0; x < width; x++)
-        {
-            char* pixel = row + x * 3;
-            file.write(pixel + 2, 1); // blue
-            file.write(pixel + 1, 1); // green
-            file.write(pixel + 0, 1); // red
-        }
-    }
+    BYTE* pixels = new BYTE[bmpInfoHeader.biSizeImage];
+    GetDIBits(hDC, hBitmap, 0, height, pixels, reinterpret_cast<BITMAPINFO*>(&bmpInfoHeader), DIB_RGB_COLORS);
+    outputFile.write(reinterpret_cast<const char*>(pixels), bmpInfoHeader.biSizeImage);
 
-    file.close();
-
-    SelectObject(hdcMemDC, hOldBitmap);
+    // Clean up
+    outputFile.close();
+    delete[] pixels;
+    SelectObject(hDC, hOldBitmap);
     DeleteObject(hBitmap);
-    DeleteDC(hdcMemDC);
-    ReleaseDC(NULL, hdcScreen);
+    DeleteDC(hDC);
+    ReleaseDC(NULL, hScreen);
+
+    return 0;
 }
     
 

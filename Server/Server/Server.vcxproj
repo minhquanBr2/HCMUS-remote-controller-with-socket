@@ -188,6 +188,7 @@
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="UtilKeystroke.h" />
     <ClInclude Include="UtilListDirectories.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="OutputWnd.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="ServerDoc.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="ServerView.cpp" />
+    <ClCompile Include="UtilKeystroke.cpp" />
     <ClCompile Include="UtilListDirectories.cpp" />
     <ClCompile Include="UtilScreenCapture.cpp" />
     <ClCompile Include="ViewTree.cpp" />

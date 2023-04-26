@@ -1,4 +1,5 @@
 #pragma once
+#include <afxwin.h>
 
 // CReceivingSocket command target
 
@@ -9,6 +10,10 @@ public:
 	virtual ~CReceivingSocket();
 	virtual void OnReceive(int nErrorCode);
 	virtual void OnClose(int nErrorCode);
+	BOOL OnReceiveCapScreen(int nErrorCode);
+	void OnReceiveKeystroke(int nErrorCode);
+private:
+	UINT_PTR m_timerId = NULL;
 };
 
 

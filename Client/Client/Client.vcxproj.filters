@@ -60,6 +60,12 @@
     <ClInclude Include="ClientDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CapScreenDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeystrokeDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -96,6 +102,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ClientDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CapScreenDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="KeystrokeDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

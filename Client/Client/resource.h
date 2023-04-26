@@ -87,27 +87,35 @@
 #define IDS_EXPLORER                    305
 #define IDS_EDIT_MENU                   306
 #define IDD_DIALOG1                     310
+#define IDD_CSCR                        317
+#define IDD_KSTR                        319
 #define IDC_CONNECT                     1001
 #define IDC_IPADDRESS                   1002
 #define IDC_PORT                        1003
 #define IDC_MESSAGE                     1004
 #define IDC_SEND                        1005
-#define IDC_BUTTON1						1006
+#define IDC_BUTTON1                     1006
 #define IDC_BN_CONN                     1007
-#define IDC_BN_SAPP						1008
-#define IDC_BN_SPRO						1009
-#define IDC_BN_CSCR						1010
-#define IDC_BN_KSTR						1011
-#define IDC_BN_BDIR						1012
+#define IDC_BN_SAPP                     1008
+#define IDC_BN_SPRO                     1009
+#define IDC_BUTTON2                     1009
+#define IDC_BN_KSTR_UNHK                1009
+#define IDC_BN_CSCR                     1010
+#define IDC_BN_KSTR                     1011
+#define IDC_BN_BDIR                     1012
+#define IDC_EDIT_KEYSTROKE              1012
+#define IDC_IMAGE                       1013
+#define IDC_BN_KSTR_HOOK                1013
+#define IDC                             1015
 #define ID_CONNECT_CONNECTTOSERVER      32771
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        315
+#define _APS_NEXT_RESOURCE_VALUE        321
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1007
+#define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif
