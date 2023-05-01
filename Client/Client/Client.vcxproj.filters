@@ -197,5 +197,8 @@
     <None Include="res\Client.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resource.hm">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

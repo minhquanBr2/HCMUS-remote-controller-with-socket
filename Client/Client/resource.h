@@ -106,7 +106,6 @@
 #define IDC_EDIT_KEYSTROKE              1012
 #define IDC_IMAGE                       1013
 #define IDC_BN_KSTR_HOOK                1013
-#define IDC                             1015
 #define ID_CONNECT_CONNECTTOSERVER      32771
 
 // Next default values for new objects

@@ -1,0 +1,42 @@
+You can load a bitmap image from a file and display it inside a picture control box in a dialog box by using the `LoadImage()` function to load the bitmap from a file. Then, send the `STM_SETIMAGE` message to the picture control along with the handle of the image you'd like to display¹.
+
+Here is an example code snippet that demonstrates how to load an image into a dialog picture control during runtime ¹:
+```cpp
+BOOL CALLBACK DialogProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    static HBITMAP bmp1, bmp2;
+    static bool isImg1 = true;
+    switch (uMsg) {
+        case WM_INITDIALOG:
+            bmp1 = (HBITMAP)SendDlgItemMessage (hwndDlg, IDC_STATIC1, STM_GETIMAGE, IMAGE_BITMAP, 0);
+            bmp2 = (HBITMAP)LoadImage (NULL, "bitmap2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+            return TRUE;
+        case WM_DESTROY:
+            DeleteObject (bmp1);
+            DeleteObject (bmp2);
+            return true;
+        case WM_CLOSE:
+            EndDialog (hwndDlg, 0);
+            return TRUE;
+        case WM_COMMAND:
+            switch (LOWORD (wParam)) {
+                case IDC_BTN_QUIT:
+                    EndDialog (hwndDlg, 0);
+                    return TRUE;
+                case IDC_BTN_TEST:
+                    if (isImg1)
+                        SendDlgItemMessage (hwndDlg, IDC_STATIC1, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp2);
+                    else
+                        SendDlgItemMessage (hwndDlg, IDC_STATIC1, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp1);
+                    isImg1 = !isImg1;
+                    return TRUE;
+            }
+    }
+    return FALSE;
+}
+```
+
+Source: Conversation with Bing, 4/26/2023(1) c++ - Loading an image into a dialog picture control during runtime .... https://stackoverflow.com/questions/21300199/loading-an-image-into-a-dialog-picture-control-during-runtime Accessed 4/26/2023.
+(2) c++ - Load BMP from file by using MFC - Stack Overflow. https://stackoverflow.com/questions/27333788/load-bmp-from-file-by-using-mfc Accessed 4/26/2023.
+(3) bitmap - Visual Studio / MFC: BMP fills Picture Control on desktop, but .... https://stackoverflow.com/questions/48168349/visual-studio-mfc-bmp-fills-picture-control-on-desktop-but-is-too-small-on-m Accessed 4/26/2023.
+(4) How to Show my picture in Picture control?. https://social.msdn.microsoft.com/Forums/en-US/6687ead6-fb08-4be7-ab33-764b2bf34ea1/how-to-show-my-picture-in-picture-control?forum=vcmfcatl Accessed 4/26/2023.
+(5) c++ - How to load a png resource into picture control on a dialog box .... https://stackoverflow.com/questions/3988484/how-to-load-a-png-resource-into-picture-control-on-a-dialog-box Accessed 4/26/2023.

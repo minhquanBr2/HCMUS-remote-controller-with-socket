@@ -22,4 +22,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
+	CStatic m_staticImg;
+	CBitmap m_bitmap;
+	afx_msg void OnStnClickedImage();
+	afx_msg void OnBnClickedOk();
 };

