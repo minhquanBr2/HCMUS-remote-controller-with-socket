@@ -83,7 +83,7 @@ BOOL CKeystrokeDlg::OnInitDialog()
 	CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_KEYSTROKE);
 
 	// Set the edit control to be a multiline edit control
-	pEdit->ModifyStyle(0, ES_AUTOHSCROLL | ES_MULTILINE);
+	pEdit->ModifyStyle(0, ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_MULTILINE);
 
 	// Select the entire text in the edit control
 	pEdit->SetSel(0, -1);

@@ -87,6 +87,8 @@
 #define IDS_EXPLORER                    305
 #define IDS_EDIT_MENU                   306
 #define IDD_DIALOG1                     310
+#define IDD_CBrowseDirDlg               314
+#define IDD_BDIR                        314
 #define IDD_CSCR                        317
 #define IDD_KSTR                        319
 #define IDC_CONNECT                     1001
@@ -106,15 +108,16 @@
 #define IDC_EDIT_KEYSTROKE              1012
 #define IDC_IMAGE                       1013
 #define IDC_BN_KSTR_HOOK                1013
+#define IDC_LIST_DIR                    1018
 #define ID_CONNECT_CONNECTTOSERVER      32771
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        321
+#define _APS_NEXT_RESOURCE_VALUE        323
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1016
-#define _APS_NEXT_SYMED_VALUE           310
+#define _APS_NEXT_CONTROL_VALUE         1019
+#define _APS_NEXT_SYMED_VALUE           315
 #endif
 #endif

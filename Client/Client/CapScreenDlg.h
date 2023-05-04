@@ -24,6 +24,7 @@ public:
 	virtual BOOL OnInitDialog();
 	CStatic m_staticImg;
 	CBitmap m_bitmap;
+	CImage m_image;
 	afx_msg void OnStnClickedImage();
 	afx_msg void OnBnClickedOk();
 };

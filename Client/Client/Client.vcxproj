@@ -183,6 +183,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BrowseDirDlg.h" />
     <ClInclude Include="CapScreenDlg.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="Client.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BrowseDirDlg.cpp" />
     <ClCompile Include="CapScreenDlg.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="Client.cpp" />

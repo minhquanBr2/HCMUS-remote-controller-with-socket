@@ -12,6 +12,7 @@ public:
 	virtual void OnClose(int nErrorCode);
 	BOOL OnReceiveCapScreen(int nErrorCode);
 	void OnReceiveKeystroke(int nErrorCode);
+	void OnReceiveBrowseDir(int nErrorCode);
 private:
 	UINT_PTR m_timerId = NULL;
 };

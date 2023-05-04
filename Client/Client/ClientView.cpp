@@ -275,9 +275,6 @@ void CClientView::OnButtonKeystrokeClicked()
 
 		m_dlgKSTR.m_strAllKeystroke = "";
 		m_dlgKSTR.DoModal();
-
-		
-
 		
 		// Receive data from server and store it in a buffer
 		//while (bytesRead = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(strRec, 256))
@@ -314,7 +311,10 @@ void CClientView::OnButtonBrowseDirClicked()
 	}
 	else
 	{
+		CString msg(string("REQ_BDIR").c_str());
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
+		m_dlgBDIR.DoModal();
 	}
 	Invalidate();
 	UpdateWindow();

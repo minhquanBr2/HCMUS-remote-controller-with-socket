@@ -18,6 +18,7 @@
 
 #include "CapScreenDlg.h"
 #include "KeystrokeDlg.h"
+#include "BrowseDirDlg.h"
 
 
 
@@ -81,6 +82,7 @@ public:
 public:
 	// functions for keystroke
 	CKeystrokeDlg m_dlgKSTR;
+	CBrowseDirDlg m_dlgBDIR;
 };
 
 #ifndef _DEBUG  // debug version in ClientView.cpp

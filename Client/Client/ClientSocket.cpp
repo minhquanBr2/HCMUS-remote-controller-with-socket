@@ -32,8 +32,9 @@ void CClientSocket::OnReceive(int nErrorCode)
 	if (((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_isHooked == TRUE)
 	{
 		((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strAllKeystroke += msg;
+		//((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strAllKeystroke += "\r\n";
 		((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strDisplay.SetWindowTextA(
-			((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strAllKeystroke);
+			((CClientApp*)AfxGetApp())->m_pClientView->m_dlgKSTR.m_strAllKeystroke + "\n\r");
 	}
 	
 	CSocket::OnReceive(nErrorCode);

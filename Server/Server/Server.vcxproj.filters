@@ -63,7 +63,7 @@
     <ClInclude Include="UtilScreenCapture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UtilListDirectories.h">
+    <ClInclude Include="UtilBrowseDirectory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UtilKeystroke.h">
@@ -110,7 +110,7 @@
     <ClCompile Include="UtilScreenCapture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UtilListDirectories.cpp">
+    <ClCompile Include="UtilBrowseDirectory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UtilKeystroke.cpp">

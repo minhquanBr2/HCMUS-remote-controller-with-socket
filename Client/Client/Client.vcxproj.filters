@@ -66,6 +66,9 @@
     <ClInclude Include="KeystrokeDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BrowseDirDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -108,6 +111,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeystrokeDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BrowseDirDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

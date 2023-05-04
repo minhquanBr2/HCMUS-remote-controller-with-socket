@@ -9,7 +9,7 @@
 
 #include "UtilScreenCapture.h"
 #include "UtilKeystroke.h"
-#include "UtilListDirectories.h"
+#include "UtilBrowseDirectory.h"
 
 #define PRE_AGREED_PORT     8686
 #define SEND_BUFFER_SIZE    4096
@@ -46,9 +46,7 @@ void CReceivingSocket::OnReceive(int nErrorCode)
     }
 	else if (strcmp(msg, "REQ_BDIR") == 0)
 	{
-		CString dirs(listDirectories().c_str());
-		this->Send(dirs.GetBuffer(dirs.GetLength()), dirs.GetLength());
-
+        OnReceiveBrowseDir(nErrorCode);
 	}
 	CSocket::OnReceive(nErrorCode);
 }
@@ -185,7 +183,7 @@ PreReturnCleanup: // labelled goto destination
         sourceFile.Close();
     // only close file if it's open (open might have failed above)
 
-    this->Close();
+    //this->Close();
 
     return bRet;
 
@@ -203,6 +201,17 @@ void CReceivingSocket::OnReceiveKeystroke(int nErrorCode)
             break;
         Sleep(10);
     }
-    this->Close();
+    //this->Close();
+}
+
+void CReceivingSocket::OnReceiveBrowseDir(int nErrorCode) 
+{
+    //CString dirs(BrowseDirectory().c_str());
+    //this->Send(dirs.GetBuffer(dirs.GetLength()), dirs.GetLength());
+
+    std::vector<std::tuple<CString, CString>> folderList;
+    std::vector<std::tuple<CString, CString, CString>> fileList;
+    BrowseDirectory("D:", folderList, fileList);
+    AfxMessageBox("D:\\");
 }
 
