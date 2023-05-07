@@ -1,4 +1,9 @@
 #pragma once
+#include <vector>
+#include <string>
+
+typedef std::tuple<CString, CString> tuple2str;
+typedef std::tuple<CString, CString, CString> tuple3str;
 
 
 // CBrowseDirDlg dialog
@@ -23,4 +28,11 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	CListCtrl m_listCtrl;
+	afx_msg void OnListCtrlClick(NMHDR* pNMHDR, LRESULT* pResult);
+	CString m_strPrevPathMB = "";
+	CString m_strPathMB;
+	CEdit m_strDisplay;
+	std::vector<CStringW> m_msgArr;
+	static std::vector<std::wstring> split(std::wstring msg, std::wstring delimiter);
+	afx_msg void OnLvnItemchangedListDir(NMHDR* pNMHDR, LRESULT* pResult);
 };

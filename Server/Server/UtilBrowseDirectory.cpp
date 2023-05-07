@@ -2,41 +2,6 @@
 
 #include "UtilBrowseDirectory.h"
 
-
-std::string BrowseDirectory() {
-    std::string folder_path = fs::current_path().string(); // Replace with your folder path
-
-    if (!fs::exists(folder_path))
-    {
-        std::cerr << "Error: Directory does not exist.\n";
-        return "";
-    }
-
-    string output = "";
-
-    for (const auto& entry : fs::directory_iterator(folder_path))
-    {
-        if (fs::is_directory(entry))
-        {
-            std::string name = entry.path().filename().string();
-            if (name != "." && name != "..")
-            {
-                output = name + "\n";
-            }
-        }
-        else if (fs::is_regular_file(entry))
-        {
-            std::string name = entry.path().filename().string();
-            if (name != "." && name != "..")
-            {
-                output += name + "\n";
-            }
-        }
-    }
-
-    return output;
-}
-
 CString FormatSizeUnits(ULONGLONG bytes)
 {
     static const char* suffix[] = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
@@ -55,19 +20,44 @@ CString FormatSizeUnits(ULONGLONG bytes)
     return str;
 }
 
-BOOL BrowseDirectory(LPCTSTR lpPath, std::vector<tuple2>& folderList, std::vector<tuple3>& fileList)
+void BrowseDisk(std::vector<CStringW>& diskList)
 {
-    WIN32_FIND_DATA ffd;
-    TCHAR szDir[MAX_PATH];
+    TCHAR szDrives[MAX_PATH] = { 0 };
+    if (!GetLogicalDriveStrings(MAX_PATH, szDrives))
+    {
+        // Error handling
+        return;
+    }
+
+    TCHAR* szDrive = szDrives;
+    FILE* f = fopen("test_output.txt", "w+");
+    while (*szDrive != '\0')
+    {
+        // Print out the drive
+        CString strDrive(szDrive);
+        strDrive = strDrive.Left(strDrive.GetLength() - 1);
+        //_tprintf(_T("%s\n"), (LPCTSTR)strDrive);
+        fprintf(f, "%s\n", (LPCTSTR)strDrive);
+        diskList.push_back(CStringW(strDrive));
+        // Move to the next drive
+        szDrive += _tcslen(szDrive) + 1;
+    }
+    fclose(f);
+}
+
+BOOL BrowseDir(CStringW lpPath, std::vector<CStringW>& dirList)
+{
+    WIN32_FIND_DATAW ffd;
+    WCHAR szDir[MAX_PATH];
     HANDLE hFind = INVALID_HANDLE_VALUE;
     DWORD dwError = 0;
 
     // Create the search path
-    StringCchCopy(szDir, MAX_PATH, lpPath);
-    StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
+    wcscpy(szDir, lpPath);
+    wcscat(szDir, L"\\*");
 
     // Find the first file in the directory
-    hFind = FindFirstFile(szDir, &ffd);
+    hFind = FindFirstFileW(szDir, &ffd);
 
 
     if (hFind != INVALID_HANDLE_VALUE)
@@ -75,68 +65,58 @@ BOOL BrowseDirectory(LPCTSTR lpPath, std::vector<tuple2>& folderList, std::vecto
         do
         {
             // Ignore . and .. directories
-            if (_tcscmp(ffd.cFileName, _T(".")) == 0 || _tcscmp(ffd.cFileName, _T("..")) == 0)
+            if (wcscmp(ffd.cFileName, L".") == 0 || wcscmp(ffd.cFileName, L"..") == 0)
             {
                 continue;
             }
 
-            CString strFileName = ffd.cFileName;
-            CString strFilePath = lpPath;
-            strFilePath += _T("\\");
-            strFilePath += strFileName;
+            CStringW strFileNameW = ffd.cFileName;
+            CStringW strFilePathW = lpPath;
+            strFilePathW += L"\\";
+            strFilePathW += strFileNameW;
 
+            /*wchar_t wstrFileName[MAX_PATH];
+            int nCharsConverted = MultiByteToWideChar(CP_ACP, 0, ffd.cFileName, -1, wstrFileName, MAX_PATH);
+            CStringW strFileNameW(wstrFileName, nCharsConverted);
 
+            wchar_t wstrFilePath[MAX_PATH];
+            nCharsConverted = MultiByteToWideChar(CP_ACP, 0, lpPath, -1, wstrFilePath, MAX_PATH);
+            CStringW strFilePathW(wstrFilePath, nCharsConverted);*/
 
+            wchar_t wstrDateModified[MAX_PATH];
+            CString dateModified = CTime(ffd.ftLastWriteTime).Format(_T("%m/%d/%Y %H:%M:%S"));
+            int nCharsConverted = MultiByteToWideChar(CP_ACP, 0, dateModified, -1, wstrDateModified, MAX_PATH);
+            CStringW dateModifiedW(wstrDateModified, nCharsConverted);
+
+            // Add folder info to dirList
             if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
             {
-                // Add directory name to folderList
-                CString fileName = ffd.cFileName;
-                CString dateModified = CTime(ffd.ftLastWriteTime).Format(_T("%m/%d/%Y %H:%M:%S"));
-                tuple2 fileInfo = std::make_tuple(fileName, dateModified);
-                folderList.push_back(fileInfo);
-
-                // Recursively call BrowseDirectory for subdirectories
-                // BrowseDirectory(strFilePath, folderList, fileList);
+                CStringW sizeW(L"BBB", 3);
+                CStringW msg = strFileNameW + L"\t" + dateModifiedW + L"\t---";
+                dirList.push_back(msg);
             }
+            // Add file info to dirList
             else
             {
-                // Add file name to fileList
-                // Get the directory name, date modified, and size
-                CString fileName = ffd.cFileName;
-                CString dateModified = CTime(ffd.ftLastWriteTime).Format(_T("%m/%d/%Y %H:%M:%S"));
                 CString size = FormatSizeUnits(ffd.nFileSizeHigh * (MAXDWORD + 1) + ffd.nFileSizeLow);
-
-                // Add the directory info to the list
-                tuple3 fileInfo = std::make_tuple(fileName, dateModified, size);
-                //CString dirInfo = dirName + _T("\t") + dateModified + _T("\t") + size;
-                fileList.push_back(fileInfo);
+                wchar_t wstrSize[MAX_PATH];
+                nCharsConverted = MultiByteToWideChar(CP_ACP, 0, size, -1, wstrSize, MAX_PATH);
+                CStringW sizeW(wstrSize, nCharsConverted);
+                CStringW msg = strFileNameW + _T("\t") + dateModifiedW + _T("\t") + sizeW;
+                dirList.push_back(msg);
             }
 
             // Write to file for testing
-            FILE* f = fopen("test_output.txt", "w+");
-            for (auto folder : folderList) fprintf(f, "%s\n", (LPCTSTR)std::get<0>(folder));
-            for (auto file : fileList) fprintf(f, "%s\n", (LPCTSTR)std::get<0>(file));
-            fclose(f);
+            std::wofstream ofs("test_output.txt");
+            for (auto dir : dirList) ofs << dir << std::endl;
+            ofs.close();
 
-        } while (::FindNextFile(hFind, &ffd));
+        } while (::FindNextFileW(hFind, &ffd));
 
         ::FindClose(hFind);
 
         return TRUE;
     }
-
-    return FALSE;
-}
-
-BOOL BrowseDirectory(LPCTSTR lpszFolder, CStringArray& folderList, CStringArray& fileList)
-{
-    CString strWildcard(lpszFolder);
-    strWildcard += _T("\\*.*");
-
-    WIN32_FIND_DATA fd;
-    HANDLE hFind = ::FindFirstFile(strWildcard, &fd);
-
-    
 
     return FALSE;
 }

@@ -89,8 +89,11 @@
 #define IDD_DIALOG1                     310
 #define IDD_CBrowseDirDlg               314
 #define IDD_BDIR                        314
+#define IDD_SPRO                        316
 #define IDD_CSCR                        317
+#define IDD_CInpPNameDlg                318
 #define IDD_KSTR                        319
+#define IDD_SPRO1                       321
 #define IDC_CONNECT                     1001
 #define IDC_IPADDRESS                   1002
 #define IDC_PORT                        1003
@@ -109,15 +112,22 @@
 #define IDC_IMAGE                       1013
 #define IDC_BN_KSTR_HOOK                1013
 #define IDC_LIST_DIR                    1018
+#define IDC_LIST_PRO                    1019
+#define ID_KILL_BTN                     1020
+#define ID_START_PRO                    1021
+#define IDC_EDIT1                       1022
+#define IDC_INP_PRO                     1022
+#define IDC_INP_PR                      1024
+#define IDC_EDIT_PATH                   1024
 #define ID_CONNECT_CONNECTTOSERVER      32771
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        323
+#define _APS_NEXT_RESOURCE_VALUE        326
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1019
-#define _APS_NEXT_SYMED_VALUE           315
+#define _APS_NEXT_CONTROL_VALUE         1025
+#define _APS_NEXT_SYMED_VALUE           322
 #endif
 #endif

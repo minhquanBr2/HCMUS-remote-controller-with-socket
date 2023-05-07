@@ -19,6 +19,10 @@
 #include "CapScreenDlg.h"
 #include "KeystrokeDlg.h"
 #include "BrowseDirDlg.h"
+#include "ShowProcessDlg.h"
+
+#include <string>
+#include <vector>
 
 
 
@@ -75,14 +79,20 @@ public:
 	void InitButtons();
 	void UpdateButtons();	
 public:
-	// functions for capturing the screen
+	// for Show Process (3)
+	CShowProcessDlg m_dlgSPRO;
+	std::string m_strProcess;
+	// for Capture Screen (4)
 	CCapScreenDlg m_dlgCSCR;
 	BOOL ReceiveFile();
 	void ShowImageDialog();
-public:
-	// functions for keystroke
+	// for Keystroke (5)
 	CKeystrokeDlg m_dlgKSTR;
+	// for Browse Directory (6)
 	CBrowseDirDlg m_dlgBDIR;
+	BOOL ReceiveBrowseDisk(std::vector<CStringW>& msgArr);
+	BOOL ReceiveBrowseDir(std::vector<CStringW>& msgArr);
+	std::string ReceiveMessageWithDelimiter(CSocket& socket, const std::string& delimiter);
 };
 
 #ifndef _DEBUG  // debug version in ClientView.cpp

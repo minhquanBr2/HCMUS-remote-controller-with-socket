@@ -27,7 +27,7 @@ void CServerSocket::OnAccept(int nErrorCode)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	// Accepting incoming connections	
-	AfxMessageBox("Client has successfully connected!");
+	// AfxMessageBox("Client has successfully connected!");
 	Accept(m_ReceivingSocket);
 	CSocket::OnAccept(nErrorCode);
 }

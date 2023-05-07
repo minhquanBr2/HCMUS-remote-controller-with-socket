@@ -59,6 +59,7 @@ BOOL CCapScreenDlg::OnInitDialog()
 
     // Load the image from a file
     CString imagePath = _T("screenshot.bmp");  // replace with your image file path
+    CImage m_image;
     m_image.Load(imagePath);
 
     // Get the dimensions of the picture control box
@@ -74,9 +75,6 @@ BOOL CCapScreenDlg::OnInitDialog()
     int newWidth = (int)(scale * m_image.GetWidth());
     int newHeight = (int)(scale * m_image.GetHeight());
     scaledImage.Create(newWidth, newHeight, m_image.GetBPP());
-
-    AfxMessageBox((std::to_string(newWidth)).c_str());
-    AfxMessageBox((std::to_string(newHeight)).c_str());
 
     // Draw the original image onto the scaled image using GDI functions
     HDC hDC = scaledImage.GetDC();
@@ -95,11 +93,7 @@ BOOL CCapScreenDlg::OnInitDialog()
     pPictureCtrl->ModifyStyle(0, SS_BITMAP);  // set the picture control to display a bitmap
     pPictureCtrl->SetBitmap(scaledImage.Detach());  // detach the scaled image to set it as the bitmap
 
-    // ...
-
     return TRUE; 
-
-
 }
 
 

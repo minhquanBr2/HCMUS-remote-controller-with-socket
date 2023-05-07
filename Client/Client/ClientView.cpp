@@ -16,12 +16,11 @@
 #include "MainFrm.h"
 
 
-#include <string>
-using std::string;
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#define BUFFER_SIZE 65536
 
 
 // CClientView
@@ -229,31 +228,54 @@ void CClientView::OnButtonShowAppClicked()
 
 void CClientView::OnButtonShowProcessClicked()
 {
-	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
-	{
+	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE) {
 		AfxMessageBox("Client hasn't been connected to server!");
 	}
-	else
-	{
+	else {
+		CString msg(std::string("REQ_SPRO").c_str());
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
+		char buffer[100000] = "";
+		int nBytesReceived = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 100000, 0);
+
+		m_strProcess = std::string(buffer);
+
+		if (nBytesReceived > 0) {
+			//MessageBox(m_strProcess.c_str(), "Process ne");
+			m_dlgSPRO.DoModal();
+		}
+		else {
+			MessageBox(std::to_string(nBytesReceived).c_str(), "ERROR");
+		}
 	}
+
 	Invalidate();
 	UpdateWindow();
 }
 
 void CClientView::OnButtonCapScreenClicked()
 {
-	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	BOOL isConnected = FALSE;
+	SOCKADDR_IN sockAddr;
+	int len = sizeof(sockAddr);
+	if (((CClientApp*)AfxGetApp())->m_ClientSocket.GetSockName((SOCKADDR*)&sockAddr, &len))
 	{
-		AfxMessageBox("Client hasn't been connected to server!");
+		isConnected = TRUE;
 	}
-	else
+
+	if (!isConnected)
 	{
-		CString msg(string("REQ_CSCR").c_str());
-		((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
-		this->ReceiveFile();
-		this->ShowImageDialog();
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Create();
+		CString IPAddress = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_strIPAddress;
+		UINT Port = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_iPort;
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(IPAddress, Port);
 	}
+
+	CString msg(std::string("REQ_CSCR").c_str());
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
+	this->ReceiveFile();
+	this->ShowImageDialog();
+
 	Invalidate();
 	UpdateWindow();
 }
@@ -266,7 +288,7 @@ void CClientView::OnButtonKeystrokeClicked()
 	}
 	else
 	{
-		CString msg(string("REQ_KSTR").c_str());
+		CString msg(std::string("REQ_KSTR").c_str());
 		((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
 		char strRec[256] = "";
@@ -305,17 +327,33 @@ void CClientView::OnButtonKeystrokeClicked()
 
 void CClientView::OnButtonBrowseDirClicked()
 {
-	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	BOOL isConnected = FALSE;
+	SOCKADDR_IN sockAddr;
+	int len = sizeof(sockAddr);
+	if (((CClientApp*)AfxGetApp())->m_ClientSocket.GetSockName((SOCKADDR*)&sockAddr, &len))
 	{
-		AfxMessageBox("Client hasn't been connected to server!");
+		isConnected = TRUE;
 	}
-	else
-	{
-		CString msg(string("REQ_BDIR").c_str());
-		((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
-		m_dlgBDIR.DoModal();
+	if (!isConnected)
+	{
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Create();
+		CString IPAddress = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_strIPAddress;
+		UINT Port = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_iPort;
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(IPAddress, Port);
 	}
+
+	// create a UTF-8 encoded string
+	const char* msg = "REQ_BDIR";
+
+	// create a CString object from the UTF-8 encoded string
+	CStringA strMsg(msg);
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(strMsg.GetBuffer(strMsg.GetLength()), strMsg.GetLength());
+	this->ReceiveBrowseDisk(m_dlgBDIR.m_msgArr);
+	
+	
+	m_dlgBDIR.DoModal();
+
 	Invalidate();
 	UpdateWindow();
 }
@@ -336,7 +374,7 @@ void CClientView::UpdateButtons()
 			m_button[i].EnableWindow(FALSE);
 }
 
-
+// For Capture Screen (4)
 BOOL CClientView::ReceiveFile()
 {
 	// local variables used in file transfer (declared here to avoid
@@ -413,6 +451,7 @@ BOOL CClientView::ReceiveFile()
 		iiGet = (cbLeftToReceive < RECV_BUFFER_SIZE) ?
 			cbLeftToReceive : RECV_BUFFER_SIZE;
 		iiRecd = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(recdData, iiGet);
+		AfxMessageBox(std::to_string(iiRecd).c_str());
 
 		// test for errors and get out if they occurred
 		if (iiRecd == SOCKET_ERROR || iiRecd == 0)
@@ -452,8 +491,79 @@ PreReturnCleanup: // labelled "goto" destination
 
 	return bRet;
 }
-
 void CClientView::ShowImageDialog()
 {
 	m_dlgCSCR.DoModal();
+}
+
+// For Browse Directory (6)
+BOOL CClientView::ReceiveBrowseDisk(std::vector<CStringW>& msgArr)
+{
+	if (!msgArr.empty())
+		msgArr.clear();
+
+	BOOL bRet = TRUE; 
+	int cbBytesRet;
+
+	char buffer[1024] = "";
+	cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 1024);
+
+	// Convert the received data to a Unicode string
+	CStringA strMsg(buffer);
+	int len = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, NULL, 0);
+	CStringW wstrMsg;
+	int wideLen = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, wstrMsg.GetBuffer(len), len);
+	wstrMsg.ReleaseBuffer(wideLen); 
+
+	// test for errors and get out if they occurred
+	if (cbBytesRet == SOCKET_ERROR || cbBytesRet == 0)
+	{
+		int iErr = ::GetLastError();
+		TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
+			"\tNumber of Bytes received (zero means connection was closed) = %d\n"
+			"\tGetLastError = %d\n", cbBytesRet, iErr);
+
+		bRet = FALSE;
+		return bRet;
+	}
+
+	msgArr.push_back(wstrMsg);
+
+	//((CClientApp*)AfxGetApp())->m_ClientSocket.Close();
+	return bRet;
+}
+BOOL CClientView::ReceiveBrowseDir(std::vector<CStringW>& msgArr)
+{
+	if (!msgArr.empty())
+		msgArr.clear();
+
+	BOOL bRet = TRUE;
+	int cbBytesRet;
+	wchar_t* buffer = new wchar_t[BUFFER_SIZE];
+
+	int timeout = 100; // 1 second timeout
+	((CClientApp*)AfxGetApp())->m_ClientSocket.SetSockOpt(SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+	cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, (BUFFER_SIZE - 1) * sizeof(wchar_t));
+	buffer[cbBytesRet] = '\0';
+
+	// test for errors and get out if they occurred
+	if (cbBytesRet == 0 || cbBytesRet == SOCKET_ERROR || std::wstring(buffer) == L"Invalid path!")
+	{
+		int iErr = ::GetLastError();
+		TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
+			"\tNumber of Bytes received (zero means connection was closed) = %d\n"
+			"\tGetLastError = %d\n", cbBytesRet, iErr);
+
+		bRet = FALSE;
+		delete[] buffer;
+		AfxMessageBox(std::to_string(cbBytesRet).c_str());
+		return bRet;
+	}
+
+	AfxMessageBox(std::to_string(cbBytesRet).c_str());
+	msgArr.push_back(std::wstring(buffer).c_str());
+	
+	delete[] buffer;
+	return bRet;
 }
