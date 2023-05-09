@@ -90,8 +90,8 @@ public:
 	CKeystrokeDlg m_dlgKSTR;
 	// for Browse Directory (6)
 	CBrowseDirDlg m_dlgBDIR;
-	BOOL ReceiveBrowseDisk(std::vector<CStringW>& msgArr);
-	BOOL ReceiveBrowseDir(std::vector<CStringW>& msgArr);
+	BOOL ReceiveBrowseDisk(std::vector<CStringA>& msgArr);
+	BOOL ReceiveBrowseDir(std::vector<CStringA>& msgArr);
 	std::string ReceiveMessageWithDelimiter(CSocket& socket, const std::string& delimiter);
 };
 

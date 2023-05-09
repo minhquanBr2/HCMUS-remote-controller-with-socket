@@ -117,8 +117,8 @@
 #define ID_START_PRO                    1021
 #define IDC_EDIT1                       1022
 #define IDC_INP_PRO                     1022
-#define IDC_INP_PR                      1024
 #define IDC_EDIT_PATH                   1024
+#define IDC_BTN_BACK                    1027
 #define ID_CONNECT_CONNECTTOSERVER      32771
 
 // Next default values for new objects
@@ -127,7 +127,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        326
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1025
+#define _APS_NEXT_CONTROL_VALUE         1028
 #define _APS_NEXT_SYMED_VALUE           322
 #endif
 #endif

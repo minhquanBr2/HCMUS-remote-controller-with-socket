@@ -34,7 +34,7 @@ void CBrowseDirDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CBrowseDirDlg, CDialogEx)
     ON_NOTIFY(NM_DBLCLK, IDC_LIST_DIR, &CBrowseDirDlg::OnListCtrlClick)
-    ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_DIR, &CBrowseDirDlg::OnLvnItemchangedListDir)
+    ON_BN_CLICKED(IDC_BTN_BACK, &CBrowseDirDlg::OnBnClickedBtnBack)
 END_MESSAGE_MAP()
 
 
@@ -60,7 +60,7 @@ BOOL CBrowseDirDlg::OnInitDialog()
     // Concatenate all disk names for displaying
     int nDisk = 0;    
     CStringW rcv_msg = L"";
-    for (CStringW disk : m_msgArr) {
+    for (CStringA disk : m_msgArr) {
         rcv_msg += disk;
         MessageBoxW(nullptr, rcv_msg, _T(L"Client3"), MB_OK);
     }
@@ -90,15 +90,20 @@ BOOL CBrowseDirDlg::OnInitDialog()
     return TRUE;
 }
 
+// Convert a CStringW string to a CStringA string
+CStringA ConvertCStringWToCStringA(const CStringW& strW)
+{
+    int lenA = WideCharToMultiByte(CP_UTF8, 0, strW, -1, NULL, 0, NULL, NULL);
+    char* ptrA = new char[lenA];
+    WideCharToMultiByte(CP_UTF8, 0, strW, -1, ptrA, lenA, NULL, NULL);
+    CStringA strA(ptrA, lenA);
+    delete[] ptrA;
+    return strA;
+}
 
 void CBrowseDirDlg::OnListCtrlClick(NMHDR* pNMHDR, LRESULT* pResult)
 {
     LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-
-    // Create message
-    // Send
-    // Receive
-    // Display
 
     // Get the index of the selected item
     int nIndex = m_listCtrl.GetNextItem(-1, LVNI_SELECTED);
@@ -132,20 +137,40 @@ void CBrowseDirDlg::OnListCtrlClick(NMHDR* pNMHDR, LRESULT* pResult)
         }
         else
         {
-            int nDir = 0;
-            int nIndex = 0;
             CStringW rcv_msg_str = L"";
-            for (CStringW dir : m_msgArr) rcv_msg_str += dir;
+            for (CStringA dir : m_msgArr)
+            {
+                int length = dir.GetLength() + 1; // Get the length of the string, including the null terminator
+                int wLength = MultiByteToWideChar(CP_UTF8, 0, dir, length, NULL, 0); // Get the required size of the buffer for the wide char string
+                CStringW wdir; // Create a CStringW to store the wide char string
+                wchar_t* buffer = wdir.GetBuffer(wLength); // Get a buffer for the wide char string
+                MultiByteToWideChar(CP_UTF8, 0, dir, length, buffer, wLength); // Convert the multibyte string to a wide char string
+                wdir.ReleaseBuffer(); // Release the buffer
+
+                rcv_msg_str += wdir;
+            }
 
             m_listCtrl.DeleteAllItems();
 
-            std::vector<std::wstring> rcv_msg_vec = split(std::wstring(rcv_msg_str), L"\n");
-            for (auto dir_str : rcv_msg_vec)
-            {
-                std::vector<std::wstring> dir_vec = split(dir_str, std::wstring(L"\t"));
-                nIndex = m_listCtrl.InsertItem(nDir, (LPCTSTR)dir_vec[0].c_str());           // dir_name
-                if (dir_vec.size() > 1) m_listCtrl.SetItemText(nIndex, 1, (LPCTSTR)dir_vec[1].c_str());              // dir_date
-                if (dir_vec.size() > 2) m_listCtrl.SetItemText(nIndex, 2, (LPCTSTR)dir_vec[2].c_str());              // dir_size
+
+            CStringW delimiterOut(L"\n"); 
+            CStringW tokenOut; 
+            int startOut = 0; 
+            int nIndex = 0;
+            int nDir = 0;
+            while ((tokenOut = rcv_msg_str.Tokenize(delimiterOut, startOut)) != L"") {
+
+                CStringW delimiterIn(L"\t");
+                CStringW tokenIn;
+                int startIn = 0;
+                std::vector<CStringW> dir_info;
+                while ((tokenIn = tokenOut.Tokenize(delimiterIn, startIn)) != L"")
+                {
+                    dir_info.push_back(tokenIn);
+                }
+                nIndex = m_listCtrl.InsertItem(nDir, ConvertCStringWToCStringA(dir_info[0]));           // dir_name
+                if (dir_info.size() > 1) m_listCtrl.SetItemText(nIndex, 1, ConvertCStringWToCStringA(dir_info[1]));              // dir_date
+                if (dir_info.size() > 2) m_listCtrl.SetItemText(nIndex, 2, ConvertCStringWToCStringA(dir_info[2]));              // dir_size
                 nDir++;
             }
         }
@@ -154,35 +179,115 @@ void CBrowseDirDlg::OnListCtrlClick(NMHDR* pNMHDR, LRESULT* pResult)
     *pResult = 0;
 }
 
-std::vector<std::wstring> CBrowseDirDlg::split(std::wstring msg, std::wstring delimiter)
+void CBrowseDirDlg::OnBnClickedBtnBack()
 {
-    std::vector<std::wstring> result;
-    int startPos = 0;
-    int curPos;
-
-    while (1)
+    // Change UI 
+    if (m_strPathMB.Right(1) == ":")
     {
-        curPos = msg.find(delimiter, startPos);
-        if (curPos == -1)
-        {
-            result.push_back(msg.substr(startPos, msg.length() - startPos));
-            break;
+        // Initial path is ""
+        m_strPathMB = "";
+        m_strDisplay.SetWindowText(m_strPathMB);
+
+        // Add columns to the CListView control
+        m_listCtrl.InsertColumn(0, _T("Name"), LVCFMT_LEFT, 300);
+        m_listCtrl.InsertColumn(1, _T("Date Modified"), LVCFMT_LEFT, 200);
+        m_listCtrl.InsertColumn(2, _T("Size"), LVCFMT_LEFT, 100);
+
+        // Concatenate all disk names for displaying
+        int nDisk = 0;
+        CStringW rcv_msg = L"";
+        for (CStringA disk : m_msgArr) {
+            rcv_msg += disk;
+            MessageBoxW(nullptr, rcv_msg, _T(L"Client3"), MB_OK);
         }
-        else
+
+        // Displaying
+        int curPos = 0;
+        CStringW disk_name_W = rcv_msg.Tokenize(L"\n", curPos);
+        while (!disk_name_W.IsEmpty())
         {
-            result.push_back(msg.substr(startPos, curPos - startPos));
-            startPos = curPos + 1;
+            // Convert Unicode string to MBCS string
+            CStringA disk_name_MB;
+            int nLen = WideCharToMultiByte(CP_ACP, 0, disk_name_W, -1, NULL, 0, NULL, NULL);
+            if (nLen > 0)
+            {
+                char* szMB = disk_name_MB.GetBuffer(nLen);
+                WideCharToMultiByte(CP_ACP, 0, disk_name_W, -1, szMB, nLen, NULL, NULL);
+                disk_name_MB.ReleaseBuffer();
+            }
+
+            // Display to box
+            m_listCtrl.InsertItem(nDisk, disk_name_MB);
+            nDisk++;
+
+            // Obtain next token
+            disk_name_W = rcv_msg.Tokenize(L"\n", curPos);
         }
     }
 
-    return result;
-}
 
 
+    else
+    {
+        // Change UI
+        m_strPathMB = m_strPrevPathMB;
+        m_strPrevPathMB = m_strPrevPathMB.Left(m_strPrevPathMB.ReverseFind('\\'));
+        m_strDisplay.SetWindowText(m_strPathMB);
 
-void CBrowseDirDlg::OnLvnItemchangedListDir(NMHDR* pNMHDR, LRESULT* pResult)
-{
-    LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-    // TODO: Add your control notification handler code here
-    *pResult = 0;
+        // Prepare for sending message
+        CStringA msg = "REQ_BDIR" + m_strPathMB;
+        if (!m_msgArr.empty())
+            m_msgArr.clear();
+
+        // Send
+        ((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
+
+        // Receive
+        BOOL browsable = ((CClientApp*)AfxGetApp())->m_pClientView->ReceiveBrowseDir(m_msgArr);
+
+        // Process and display
+        if (!browsable)
+        {
+            m_strPathMB = m_strPrevPathMB;
+            m_strDisplay.SetWindowText(m_strPathMB);
+        }
+        else
+        {
+            CStringW rcv_msg_str = L"";
+            for (CStringA dir : m_msgArr)
+            {
+                int length = dir.GetLength() + 1; // Get the length of the string, including the null terminator
+                int wLength = MultiByteToWideChar(CP_UTF8, 0, dir, length, NULL, 0); // Get the required size of the buffer for the wide char string
+                CStringW wdir; // Create a CStringW to store the wide char string
+                wchar_t* buffer = wdir.GetBuffer(wLength); // Get a buffer for the wide char string
+                MultiByteToWideChar(CP_UTF8, 0, dir, length, buffer, wLength); // Convert the multibyte string to a wide char string
+                wdir.ReleaseBuffer(); // Release the buffer
+
+                rcv_msg_str += wdir;
+            }
+
+            m_listCtrl.DeleteAllItems();
+
+
+            CStringW delimiterOut(L"\n");
+            CStringW tokenOut;
+            int startOut = 0;
+            int nIndex = 0;
+            int nDir = 0;
+            while ((tokenOut = rcv_msg_str.Tokenize(delimiterOut, startOut)) != L"") {
+
+                CStringW delimiterIn(L"\t");
+                CStringW tokenIn;
+                int startIn = 0;
+                std::vector<CStringW> dir_info;
+                while ((tokenIn = tokenOut.Tokenize(delimiterIn, startIn)) != L"")
+                    dir_info.push_back(tokenIn);
+                nIndex = m_listCtrl.InsertItem(nDir, ConvertCStringWToCStringA(dir_info[0]));           // dir_name
+                if (dir_info.size() > 1) m_listCtrl.SetItemText(nIndex, 1, ConvertCStringWToCStringA(dir_info[1]));              // dir_date
+                if (dir_info.size() > 2) m_listCtrl.SetItemText(nIndex, 2, ConvertCStringWToCStringA(dir_info[2]));              // dir_size
+                nDir++;
+            }
+        }
+    }
+    
 }

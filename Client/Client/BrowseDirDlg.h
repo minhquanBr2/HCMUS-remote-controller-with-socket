@@ -32,7 +32,6 @@ public:
 	CString m_strPrevPathMB = "";
 	CString m_strPathMB;
 	CEdit m_strDisplay;
-	std::vector<CStringW> m_msgArr;
-	static std::vector<std::wstring> split(std::wstring msg, std::wstring delimiter);
-	afx_msg void OnLvnItemchangedListDir(NMHDR* pNMHDR, LRESULT* pResult);
+	std::vector<CStringA> m_msgArr;
+	afx_msg void OnBnClickedBtnBack();
 };

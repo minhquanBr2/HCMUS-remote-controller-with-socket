@@ -324,7 +324,6 @@ void CClientView::OnButtonKeystrokeClicked()
 	UpdateWindow();
 }
 
-
 void CClientView::OnButtonBrowseDirClicked()
 {
 	BOOL isConnected = FALSE;
@@ -497,7 +496,7 @@ void CClientView::ShowImageDialog()
 }
 
 // For Browse Directory (6)
-BOOL CClientView::ReceiveBrowseDisk(std::vector<CStringW>& msgArr)
+BOOL CClientView::ReceiveBrowseDisk(std::vector<CStringA>& msgArr)
 {
 	if (!msgArr.empty())
 		msgArr.clear();
@@ -507,13 +506,9 @@ BOOL CClientView::ReceiveBrowseDisk(std::vector<CStringW>& msgArr)
 
 	char buffer[1024] = "";
 	cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 1024);
+	buffer[cbBytesRet] = '\0';
 
-	// Convert the received data to a Unicode string
 	CStringA strMsg(buffer);
-	int len = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, NULL, 0);
-	CStringW wstrMsg;
-	int wideLen = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, wstrMsg.GetBuffer(len), len);
-	wstrMsg.ReleaseBuffer(wideLen); 
 
 	// test for errors and get out if they occurred
 	if (cbBytesRet == SOCKET_ERROR || cbBytesRet == 0)
@@ -527,28 +522,30 @@ BOOL CClientView::ReceiveBrowseDisk(std::vector<CStringW>& msgArr)
 		return bRet;
 	}
 
-	msgArr.push_back(wstrMsg);
+	msgArr.push_back(strMsg);
 
 	//((CClientApp*)AfxGetApp())->m_ClientSocket.Close();
 	return bRet;
 }
-BOOL CClientView::ReceiveBrowseDir(std::vector<CStringW>& msgArr)
+BOOL CClientView::ReceiveBrowseDir(std::vector<CStringA>& msgArr)
 {
 	if (!msgArr.empty())
 		msgArr.clear();
 
 	BOOL bRet = TRUE;
 	int cbBytesRet;
-	wchar_t* buffer = new wchar_t[BUFFER_SIZE];
+	char* buffer = new char[BUFFER_SIZE];
 
 	int timeout = 100; // 1 second timeout
 	((CClientApp*)AfxGetApp())->m_ClientSocket.SetSockOpt(SO_RCVTIMEO, &timeout, sizeof(timeout));
 
-	cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, (BUFFER_SIZE - 1) * sizeof(wchar_t));
+	cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, (BUFFER_SIZE - 1));
 	buffer[cbBytesRet] = '\0';
 
+	CStringA strMsg(buffer);
+
 	// test for errors and get out if they occurred
-	if (cbBytesRet == 0 || cbBytesRet == SOCKET_ERROR || std::wstring(buffer) == L"Invalid path!")
+	if (cbBytesRet == 0 || cbBytesRet == SOCKET_ERROR || std::string(buffer) == "Invalid path!")
 	{
 		int iErr = ::GetLastError();
 		TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
@@ -562,7 +559,7 @@ BOOL CClientView::ReceiveBrowseDir(std::vector<CStringW>& msgArr)
 	}
 
 	AfxMessageBox(std::to_string(cbBytesRet).c_str());
-	msgArr.push_back(std::wstring(buffer).c_str());
+	msgArr.push_back(strMsg);
 	
 	delete[] buffer;
 	return bRet;

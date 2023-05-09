@@ -291,14 +291,16 @@ void CReceivingSocket::OnReceiveBrowseDir(int nErrorCode, CStringW path)
             wmsg += formattedDir;
         }   
 
-        AfxMessageBox(std::to_string(dirList.size()).c_str());              // 96
-        MessageBoxW(nullptr, wmsg, L"SV", MB_OK);
+        int lenW = wmsg.GetLength(); // Length of the CStringW
+        LPCWSTR ptrW = wmsg.GetBuffer(); // Pointer to the wide char string buffer
+        int lenUTF8 = WideCharToMultiByte(CP_UTF8, 0, ptrW, lenW, NULL, 0, NULL, NULL); // Length of the required UTF-8 encoded byte stream
+        LPSTR ptrUTF8 = new char[lenUTF8 + 1]; // Allocate a buffer for the UTF-8 encoded byte stream
+        WideCharToMultiByte(CP_UTF8, 0, ptrW, lenW, ptrUTF8, lenUTF8, NULL, NULL); // Convert the wide char string to UTF-8
+        ptrUTF8[lenUTF8] = '\0'; // Null-terminate the UTF-8 encoded byte stream
+        wmsg.ReleaseBuffer(); // Release the buffer obtained from GetBuffer()
 
-        // Convert the CStringW object to a UTF - 8 encoded byte buffer using the WideCharToMultiByte
-        int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wmsg, wmsg.GetLength(), NULL, 0, NULL, NULL);
-        std::vector<char> msg(bufferSize);
-        WideCharToMultiByte(CP_UTF8, 0, wmsg, wmsg.GetLength(), msg.data(), bufferSize, NULL, NULL);
-        int cbBytesSent = this->Send(msg.data(), msg.size());
+        CStringA msg(ptrUTF8);
+        int cbBytesSent = this->Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
     }
     else
     {
