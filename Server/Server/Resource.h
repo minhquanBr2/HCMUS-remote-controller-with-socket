@@ -85,6 +85,7 @@
 #define IDS_FIND_TAB				302
 #define IDS_EXPLORER				305
 #define IDS_EDIT_MENU				306
+#define IDD_CInpProName                 310
 
 // Next default values for new objects
 //

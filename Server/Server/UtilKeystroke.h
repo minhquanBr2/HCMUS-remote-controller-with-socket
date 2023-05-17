@@ -1,3 +1,3 @@
 #pragma once
 
-std::string Keystroke();
+CString GetKeystrokeName(int vkCode);

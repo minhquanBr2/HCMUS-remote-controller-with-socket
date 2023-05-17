@@ -47,7 +47,6 @@ END_MESSAGE_MAP()
 
 CClientView::CClientView() noexcept
 {
-	// TODO: add construction code here
 	((CClientApp*)AfxGetApp())->m_pClientView = this;
 }
 
@@ -147,32 +146,17 @@ CClientDoc* CClientView::GetDocument() const // non-debug version is inline
 #endif //_DEBUG
 
 
-// CClientView message handlers
-
-
-//void CClientView::OnConnectConnectToServer()
-//{
-//	// TODO: Add your command handler code here
-//	CClientDlg dlgConnect;
-//	dlgConnect.DoModal();
-//
-//}
-
 void CClientView::AddMsg(CString strMessage)
 {
-	// TODO: Add your implementation code here.
 	m_MsgArray.Add(strMessage);
 	Invalidate();
 }
-
-
 
 int CClientView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	// TODO:  Add your specialized creation code here
 	m_button[0].Create("CONNECT", BS_PUSHBUTTON,
 		CRect(300, 100, 580, 150), this, IDC_BN_CONN);
 	m_button[1].Create("SHOW APPLICATIONS", BS_PUSHBUTTON,
@@ -191,6 +175,26 @@ int CClientView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+// extra functions
+std::string getFirstWord(char* input) {
+	// Find the length of the input string
+	size_t length = strlen(input);
+
+	// Skip leading whitespace characters
+	size_t i = 0;
+	while (i < length && input[i] == ' ')
+		i++;
+
+	// Find the end of the first word
+	size_t wordEnd = i;
+	while (wordEnd < length && input[wordEnd] != ' ')
+		wordEnd++;
+
+	// Extract the first word
+	std::string firstWord(input + i, wordEnd - i);
+
+	return firstWord;
+}
 
 void CClientView::OnButtonConnectClicked()
 {
@@ -214,43 +218,78 @@ void CClientView::OnButtonConnectClicked()
 
 void CClientView::OnButtonShowAppClicked()
 {
-	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	BOOL isConnected = FALSE;
+	SOCKADDR_IN sockAddr;
+	int len = sizeof(sockAddr);
+	if (((CClientApp*)AfxGetApp())->m_ClientSocket.GetSockName((SOCKADDR*)&sockAddr, &len))
 	{
-		AfxMessageBox("Client hasn't been connected to server!");
+		isConnected = TRUE;
 	}
-	else
-	{
 
+	if (!isConnected)
+	{
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Create();
+		CString IPAddress = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_strIPAddress;
+		UINT Port = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_iPort;
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(IPAddress, Port);
 	}
-	Invalidate();
-	UpdateWindow();
+
+	CString msg(std::string("REQ_SAPP").c_str());
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
+
+	char buffer[50000] = "";
+	int nBytesReceived = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 50000, 0);
+
+	if (getFirstWord(buffer) == "Failed")
+		return;
+
+	m_strApp = std::string(buffer);
+
+	if (nBytesReceived > 0) {
+		m_dlgSAPP.DoModal();
+
+		Invalidate();
+		UpdateWindow();
+	}
 }
 
 void CClientView::OnButtonShowProcessClicked()
 {
-	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE) {
-		AfxMessageBox("Client hasn't been connected to server!");
-	}
-	else {
-		CString msg(std::string("REQ_SPRO").c_str());
-		((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
-
-		char buffer[100000] = "";
-		int nBytesReceived = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 100000, 0);
-
-		m_strProcess = std::string(buffer);
-
-		if (nBytesReceived > 0) {
-			//MessageBox(m_strProcess.c_str(), "Process ne");
-			m_dlgSPRO.DoModal();
-		}
-		else {
-			MessageBox(std::to_string(nBytesReceived).c_str(), "ERROR");
-		}
+	BOOL isConnected = FALSE;
+	SOCKADDR_IN sockAddr;
+	int len = sizeof(sockAddr);
+	if (((CClientApp*)AfxGetApp())->m_ClientSocket.GetSockName((SOCKADDR*)&sockAddr, &len))
+	{
+		isConnected = TRUE;
 	}
 
-	Invalidate();
-	UpdateWindow();
+	if (!isConnected)
+	{
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Create();
+		CString IPAddress = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_strIPAddress;
+		UINT Port = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_iPort;
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(IPAddress, Port);
+	}
+
+	CString msg(std::string("REQ_SPRO").c_str());
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
+
+	char buffer[50000] = "";
+	int nBytesReceived = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 50000, 0);
+
+	if (getFirstWord(buffer) == "Failed")
+		return;
+
+	m_strProcess = std::string(buffer);
+
+	if (nBytesReceived > 0) {
+		//MessageBox(m_strProcess.c_str(), "Process ne");
+		m_dlgSPRO.DoModal();
+		m_dlgSPRO.OnInitDialog();
+
+		Invalidate();
+		UpdateWindow();
+	}
 }
 
 void CClientView::OnButtonCapScreenClicked()
@@ -282,44 +321,25 @@ void CClientView::OnButtonCapScreenClicked()
 
 void CClientView::OnButtonKeystrokeClicked()
 {
-	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
+	BOOL isConnected = FALSE;
+	SOCKADDR_IN sockAddr;
+	int len = sizeof(sockAddr);
+	if (((CClientApp*)AfxGetApp())->m_ClientSocket.GetSockName((SOCKADDR*)&sockAddr, &len))
 	{
-		AfxMessageBox("Client hasn't been connected to server!");
+		isConnected = TRUE;
 	}
-	else
+
+	if (!isConnected)
 	{
-		CString msg(std::string("REQ_KSTR").c_str());
-		((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
-
-		char strRec[256] = "";
-		int bytesRead;
-		int nErrorCode = 0;
-
-		m_dlgKSTR.m_strAllKeystroke = "";
-		m_dlgKSTR.DoModal();
-		
-		// Receive data from server and store it in a buffer
-		//while (bytesRead = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(strRec, 256))
-		//{
-		//	// Print data to the edit control
-		//	CString str(strRec, bytesRead);
-		//	AfxMessageBox(str);								// it didnt't work
-		//	//dlg.m_strKeystroke.ReplaceSel(str + "\r\n");
-		//	
-		//	// Continue listening for incoming data
-		//	((CClientApp*)AfxGetApp())->m_ClientSocket.AsyncSelect(FD_READ);
-
-		//}
-
-		//((CClientApp*)AfxGetApp())->m_ClientSocket.OnReceive(nErrorCode);
-
-		//	// Print data to the edit control
-		//	AfxMessageBox("view");								// it didnt't work
-		//	//dlg.m_strKeystroke.ReplaceSel(str + "\r\n");
-
-		//	// Continue listening for incoming data
-		//	((CClientApp*)AfxGetApp())->m_ClientSocket.AsyncSelect(FD_READ);
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Create();
+		CString IPAddress = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_strIPAddress;
+		UINT Port = ((CClientApp*)AfxGetApp())->m_ClientDlg.m_iPort;
+		((CClientApp*)AfxGetApp())->m_ClientSocket.Connect(IPAddress, Port);
 	}
+	
+	int nErrorCode = 0;
+	m_dlgKSTR.m_strAllKeystroke = "";
+	m_dlgKSTR.DoModal();
 	Invalidate();
 	UpdateWindow();
 }
@@ -450,7 +470,6 @@ BOOL CClientView::ReceiveFile()
 		iiGet = (cbLeftToReceive < RECV_BUFFER_SIZE) ?
 			cbLeftToReceive : RECV_BUFFER_SIZE;
 		iiRecd = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(recdData, iiGet);
-		AfxMessageBox(std::to_string(iiRecd).c_str());
 
 		// test for errors and get out if they occurred
 		if (iiRecd == SOCKET_ERROR || iiRecd == 0)
@@ -554,11 +573,9 @@ BOOL CClientView::ReceiveBrowseDir(std::vector<CStringA>& msgArr)
 
 		bRet = FALSE;
 		delete[] buffer;
-		AfxMessageBox(std::to_string(cbBytesRet).c_str());
 		return bRet;
 	}
 
-	AfxMessageBox(std::to_string(cbBytesRet).c_str());
 	msgArr.push_back(strMsg);
 	
 	delete[] buffer;

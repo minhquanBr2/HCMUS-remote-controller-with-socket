@@ -62,7 +62,6 @@ BOOL CBrowseDirDlg::OnInitDialog()
     CStringW rcv_msg = L"";
     for (CStringA disk : m_msgArr) {
         rcv_msg += disk;
-        MessageBoxW(nullptr, rcv_msg, _T(L"Client3"), MB_OK);
     }
 
     // Displaying
@@ -189,16 +188,22 @@ void CBrowseDirDlg::OnBnClickedBtnBack()
         m_strDisplay.SetWindowText(m_strPathMB);
 
         // Add columns to the CListView control
+        m_listCtrl.DeleteAllItems();
         m_listCtrl.InsertColumn(0, _T("Name"), LVCFMT_LEFT, 300);
         m_listCtrl.InsertColumn(1, _T("Date Modified"), LVCFMT_LEFT, 200);
         m_listCtrl.InsertColumn(2, _T("Size"), LVCFMT_LEFT, 100);
+
+        // browse disks
+        const char* msg = "REQ_BDIR";
+        CStringA strMsg(msg);
+        ((CClientApp*)AfxGetApp())->m_ClientSocket.Send(strMsg.GetBuffer(strMsg.GetLength()), strMsg.GetLength());
+        ((CClientApp*)AfxGetApp())->m_pClientView->ReceiveBrowseDisk(m_msgArr);
 
         // Concatenate all disk names for displaying
         int nDisk = 0;
         CStringW rcv_msg = L"";
         for (CStringA disk : m_msgArr) {
             rcv_msg += disk;
-            MessageBoxW(nullptr, rcv_msg, _T(L"Client3"), MB_OK);
         }
 
         // Displaying

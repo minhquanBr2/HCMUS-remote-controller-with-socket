@@ -20,6 +20,7 @@
 #include "KeystrokeDlg.h"
 #include "BrowseDirDlg.h"
 #include "ShowProcessDlg.h"
+#include "ShowAppDlg.h"
 
 #include <string>
 #include <vector>
@@ -79,20 +80,22 @@ public:
 	void InitButtons();
 	void UpdateButtons();	
 public:
-	// for Show Process (3)
+	// for Show App (1)
+	CShowAppDlg m_dlgSAPP;
+	std::string m_strApp;
+	// for Show Process (2)
 	CShowProcessDlg m_dlgSPRO;
 	std::string m_strProcess;
-	// for Capture Screen (4)
+	// for Capture Screen (3)
 	CCapScreenDlg m_dlgCSCR;
 	BOOL ReceiveFile();
 	void ShowImageDialog();
-	// for Keystroke (5)
+	// for Keystroke (4)
 	CKeystrokeDlg m_dlgKSTR;
-	// for Browse Directory (6)
+	// for Browse Directory (5)
 	CBrowseDirDlg m_dlgBDIR;
 	BOOL ReceiveBrowseDisk(std::vector<CStringA>& msgArr);
 	BOOL ReceiveBrowseDir(std::vector<CStringA>& msgArr);
-	std::string ReceiveMessageWithDelimiter(CSocket& socket, const std::string& delimiter);
 };
 
 #ifndef _DEBUG  // debug version in ClientView.cpp

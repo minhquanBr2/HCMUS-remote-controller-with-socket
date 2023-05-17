@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include "InpProNameDlg.h"
 
 // CShowProcessDlg dialog
 
@@ -17,7 +18,7 @@ public:
 	CShowProcessDlg(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CShowProcessDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_SPRO1 };
 #endif
@@ -33,4 +34,5 @@ public:
 	virtual BOOL OnInitDialog();
 	CListCtrl m_listCtrl;
 	CString cur_PID;
+	CInpProNameDlg m_dlgINP;
 };

@@ -11,7 +11,7 @@ public:
 	CKeystrokeDlg(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CKeystrokeDlg();
 public:
-	BOOL m_isHooked = FALSE;
+	BOOL m_isHooked;
 	CEdit m_strDisplay;
 	CString m_strAllKeystroke;
 
@@ -28,6 +28,7 @@ public:
 	//CClientApp* m_pMainWnd;
 	afx_msg void OnBnClickedBnKstrHook();
 	afx_msg void OnBnClickedBnKstrUnhk();
-	afx_msg void OnEnChangeEditKeystroke();
 	virtual BOOL OnInitDialog();
+	virtual void OnCancel();
+	virtual void OnOK();
 };

@@ -94,6 +94,10 @@
 #define IDD_CInpPNameDlg                318
 #define IDD_KSTR                        319
 #define IDD_SPRO1                       321
+#define IDD_SHOW_APP_DLG                322
+#define IDD_INP_PRO_NAME_DLG            323
+#define IDD_CInpAppNameDlg              324
+#define IDD_INP_APP_NAME_DLG            324
 #define IDC_CONNECT                     1001
 #define IDC_IPADDRESS                   1002
 #define IDC_PORT                        1003
@@ -117,17 +121,24 @@
 #define ID_START_PRO                    1021
 #define IDC_EDIT1                       1022
 #define IDC_INP_PRO                     1022
+#define IDC_INP_NAME_PRO                1022
+#define IDC_INP_NAME_APP                1022
 #define IDC_EDIT_PATH                   1024
 #define IDC_BTN_BACK                    1027
+#define ID_KILL_APP_BTN                 1032
+#define ID_START_APP_BTN                1033
+#define IDC_LIST_APP                    1036
+#define IDC_BTN_START                   1037
+#define ID_BTN_START                    1038
 #define ID_CONNECT_CONNECTTOSERVER      32771
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        326
+#define _APS_NEXT_RESOURCE_VALUE        329
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1028
-#define _APS_NEXT_SYMED_VALUE           322
+#define _APS_NEXT_CONTROL_VALUE         1039
+#define _APS_NEXT_SYMED_VALUE           325
 #endif
 #endif

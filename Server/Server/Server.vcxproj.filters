@@ -72,6 +72,12 @@
     <ClInclude Include="UtilShowProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InpProName.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilShowApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -120,6 +126,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UtilShowProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InpProName.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UtilShowApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

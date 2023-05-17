@@ -12,10 +12,7 @@
 IMPLEMENT_DYNAMIC(CShowProcessDlg, CDialogEx)
 
 CShowProcessDlg::CShowProcessDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_SPRO1, pParent)
-{
-
-}
+	: CDialogEx(IDD_SPRO, pParent) {}
 
 CShowProcessDlg::~CShowProcessDlg()
 {
@@ -27,13 +24,11 @@ void CShowProcessDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_PRO, m_listCtrl);
 }
 
-
 BEGIN_MESSAGE_MAP(CShowProcessDlg, CDialogEx)
 	ON_BN_CLICKED(ID_KILL_BTN, &CShowProcessDlg::OnBnClickedKillBtn)
 	ON_BN_CLICKED(ID_START_PRO, &CShowProcessDlg::OnBnClickedStartPro)
-	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_PRO, &CShowProcessDlg::OnLvnItemchangedListPro)
+	ON_NOTIFY(NM_CLICK, IDC_LIST_PRO, &CShowProcessDlg::OnLvnItemchangedListPro)
 END_MESSAGE_MAP()
-
 
 // CShowProcessDlg message handlers
 std::vector<std::pair<std::string, std::string>> splitString(const std::string& str)
@@ -69,14 +64,19 @@ std::vector<std::pair<std::string, std::string>> splitString(const std::string& 
 	return result;
 }
 
-
 void CShowProcessDlg::OnBnClickedKillBtn()
 {
 	CString msg = CString("REQ_SPRO_KILL");
 	msg = msg + " " + cur_PID;
 	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
-	//MessageBox((LPCTSTR)msg, "Client");
+	char buffer[1000] = "";
+	int nBytesReceived = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 100000, 0);
+
+	MessageBox(buffer);
+	if (strcmp(buffer, "Failed!") == 0) {
+		return;
+	}
 
 	CListCtrl* pListCtrl = (CListCtrl*)GetDlgItem(IDC_LIST_PRO);
 
@@ -85,17 +85,14 @@ void CShowProcessDlg::OnBnClickedKillBtn()
 
 	if (nIndex >= 0)
 	{
-		// Delete the selected item
 		pListCtrl->DeleteItem(nIndex);
 	}
 }
 
-
 void CShowProcessDlg::OnBnClickedStartPro()
 {
-	// TODO: Add your control notification handler code here
+	m_dlgINP.DoModal();
 }
-
 
 void CShowProcessDlg::OnLvnItemchangedListPro(NMHDR* pNMHDR, LRESULT* pResult)
 {
@@ -112,31 +109,17 @@ void CShowProcessDlg::OnLvnItemchangedListPro(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-
 BOOL CShowProcessDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
 	m_listCtrl.SubclassDlgItem(IDD_SPRO, this);
+	m_listCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 
 	m_listCtrl.InsertColumn(0, _T("Process Name"), LVCFMT_LEFT, 300);
 	m_listCtrl.InsertColumn(1, _T("Process ID"), LVCFMT_LEFT, 200);
 
-	// xu ly process
-
 	std::string process = ((CClientApp*)AfxGetApp())->m_pClientView->m_strProcess;
-
-
-	//MessageBox(process.c_str());
-
-	//std::stringstream ss(process);
-	//std::string name, id;
-	//while (ss >> name >> id) {
-	//	int nIndex = m_listCtrl.InsertItem(0, _T(name.c_str()));
-	//	m_listCtrl.SetItemText(nIndex, 1, _T(id.c_str()));
-	//	/*MessageBox(name.c_str());
-	//	MessageBox(id.c_str());*/
-	//}
 
 	std::vector<std::pair<std::string, std::string>> lst = splitString(process);
 	for (std::pair<std::string, std::string> x : lst) {
