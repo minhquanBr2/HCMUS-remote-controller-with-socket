@@ -285,7 +285,6 @@ void CClientView::OnButtonShowProcessClicked()
 	if (nBytesReceived > 0) {
 		//MessageBox(m_strProcess.c_str(), "Process ne");
 		m_dlgSPRO.DoModal();
-		m_dlgSPRO.OnInitDialog();
 
 		Invalidate();
 		UpdateWindow();

@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 #include "InpAppNameDlg.h"
-
+#include <algorithm>
 
 // CShowAppDlg dialog
 
@@ -28,7 +28,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedKillBtn();
-	afx_msg void OnBnClickedStartPro();
+	afx_msg void OnBnClickedStartApp();
 	afx_msg void OnLvnItemchangedListApp(NMHDR* pNMHDR, LRESULT* pResult);
 	virtual BOOL OnInitDialog();
 

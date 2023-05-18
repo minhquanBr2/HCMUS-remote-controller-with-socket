@@ -29,7 +29,7 @@ void CShowAppDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CShowAppDlg, CDialogEx)
 	ON_BN_CLICKED(ID_KILL_APP_BTN, &CShowAppDlg::OnBnClickedKillBtn)
-	ON_BN_CLICKED(ID_START_APP_BTN, &CShowAppDlg::OnBnClickedStartPro)
+	ON_BN_CLICKED(ID_START_APP_BTN, &CShowAppDlg::OnBnClickedStartApp)
 	ON_NOTIFY(NM_CLICK, IDC_LIST_APP, &CShowAppDlg::OnLvnItemchangedListApp)
 END_MESSAGE_MAP()
 
@@ -78,7 +78,7 @@ void CShowAppDlg::OnBnClickedKillBtn()
 	}
 }
 
-void CShowAppDlg::OnBnClickedStartPro()
+void CShowAppDlg::OnBnClickedStartApp()
 {
 	// TODO: Add your control notification handler code here
 	m_dlgINP.DoModal();
@@ -99,6 +99,9 @@ BOOL CShowAppDlg::OnInitDialog()
 	std::string process = ((CClientApp*)AfxGetApp())->m_pClientView->m_strApp;
 
 	std::vector<std::string> lst = splitString(process);
+
+	sort(lst.begin(), lst.end());
+
 	int cnt = 0;
 	for (std::string x : lst) {
 		++cnt;

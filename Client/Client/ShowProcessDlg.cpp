@@ -122,11 +122,32 @@ BOOL CShowProcessDlg::OnInitDialog()
 	std::string process = ((CClientApp*)AfxGetApp())->m_pClientView->m_strProcess;
 
 	std::vector<std::pair<std::string, std::string>> lst = splitString(process);
+
+	sort(lst.begin(), lst.end(), [](std::pair<std::string, std::string> A, std::pair<std::string, std::string> B) {
+		return A.first < B.first || (A.first == B.first && stoi(A.second) < stoi(B.second));
+		});
+
+	int cnt = 0;
 	for (std::pair<std::string, std::string> x : lst) {
-		int nIndex = m_listCtrl.InsertItem(0, _T(x.first.c_str()));
+		int nIndex = m_listCtrl.InsertItem(cnt++, _T(x.first.c_str()));
 		m_listCtrl.SetItemText(nIndex, 1, _T(x.second.c_str()));
 	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CShowProcessDlg::OnOK()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	CDialogEx::OnOK();
+}
+
+
+void CShowProcessDlg::OnCancel()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	CDialogEx::OnCancel();
 }

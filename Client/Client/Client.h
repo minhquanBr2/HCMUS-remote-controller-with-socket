@@ -10,6 +10,7 @@
 #include "resource.h"       // main symbols
 #include "ClientView.h"
 #include "ClientDlg.h"
+#include "MainFrm.h"
 
 
 // CClientApp:

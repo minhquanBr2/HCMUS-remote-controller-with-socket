@@ -143,6 +143,7 @@ BOOL CClientApp::InitInstance()
 		return FALSE;
 
 	// The one and only window has been initialized, so show and update it
+	m_pMainWnd->SetMenu(NULL);
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->SetWindowText("Client");
 	m_pMainWnd->UpdateWindow();

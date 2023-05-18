@@ -1,12 +1,12 @@
 #pragma once
 #include "afxdialogex.h"
-
 #include <string>
 #include <vector>
 #include <iostream>
 #include <vector>
 #include <utility>
 #include "InpProNameDlg.h"
+#include <algorithm>
 
 // CShowProcessDlg dialog
 
@@ -35,4 +35,6 @@ public:
 	CListCtrl m_listCtrl;
 	CString cur_PID;
 	CInpProNameDlg m_dlgINP;
+	virtual void OnOK();
+	virtual void OnCancel();
 };
