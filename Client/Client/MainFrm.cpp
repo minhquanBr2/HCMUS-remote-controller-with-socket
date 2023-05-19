@@ -43,6 +43,7 @@ CMainFrame::CMainFrame() noexcept
 {
 	// TODO: add member initialization code here
 	theApp.m_nAppLook = theApp.GetInt(_T("ApplicationLook"), ID_VIEW_APPLOOK_VS_2008);
+	m_backgroundImage.LoadBitmap(IDB_BACKGROUND_IMAGE);
 }
 
 CMainFrame::~CMainFrame()
@@ -53,6 +54,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CFrameWndEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
+
+	CPaintDC dc(this);
+	CDC memDC;
+	memDC.CreateCompatibleDC(&dc);
+	CBitmap* pOldBitmap = memDC.SelectObject(&m_backgroundImage);
+	CRect clientRect;
+	GetClientRect(&clientRect);
+	dc.BitBlt(0, 0, clientRect.Width(), clientRect.Height(), &memDC, 0, 0, SRCCOPY);
+	memDC.SelectObject(pOldBitmap);
 
 	BOOL bNameValid;
 

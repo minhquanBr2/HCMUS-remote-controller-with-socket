@@ -6,6 +6,8 @@
 #include "BrowseDirDlg.h"
 #include "afxdialogex.h"
 
+#define BUFFER_SIZE 65536
+
 
 
 // CBrowseDirDlg dialog
@@ -126,13 +128,14 @@ void CBrowseDirDlg::OnListCtrlClick(NMHDR* pNMHDR, LRESULT* pResult)
         ((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
         // Receive
-        BOOL browsable = ((CClientApp*)AfxGetApp())->m_pClientView->ReceiveBrowseDir(m_msgArr);
+        BOOL browsable = this->ReceiveBrowseDir(m_msgArr);
 
         // Process and display
         if (!browsable)
         {
             m_strPathMB = m_strPrevPathMB;
             m_strDisplay.SetWindowText(m_strPathMB);
+            AfxMessageBox("Unable to browse more!");
         }
         else
         {
@@ -197,7 +200,7 @@ void CBrowseDirDlg::OnBnClickedBtnBack()
         const char* msg = "REQ_BDIR";
         CStringA strMsg(msg);
         ((CClientApp*)AfxGetApp())->m_ClientSocket.Send(strMsg.GetBuffer(strMsg.GetLength()), strMsg.GetLength());
-        ((CClientApp*)AfxGetApp())->m_pClientView->ReceiveBrowseDisk(m_msgArr);
+        this->ReceiveBrowseDisk(m_msgArr);
 
         // Concatenate all disk names for displaying
         int nDisk = 0;
@@ -248,13 +251,14 @@ void CBrowseDirDlg::OnBnClickedBtnBack()
         ((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
         // Receive
-        BOOL browsable = ((CClientApp*)AfxGetApp())->m_pClientView->ReceiveBrowseDir(m_msgArr);
+        BOOL browsable = this->ReceiveBrowseDir(m_msgArr);
 
         // Process and display
         if (!browsable)
         {
             m_strPathMB = m_strPrevPathMB;
             m_strDisplay.SetWindowText(m_strPathMB);
+            AfxMessageBox("Invalid path!");
         }
         else
         {
@@ -295,4 +299,71 @@ void CBrowseDirDlg::OnBnClickedBtnBack()
         }
     }
     
+}
+
+BOOL CBrowseDirDlg::ReceiveBrowseDisk(std::vector<CStringA>& msgArr)
+{
+    if (!msgArr.empty())
+        msgArr.clear();
+
+    BOOL bRet = TRUE;
+    int cbBytesRet;
+
+    char buffer[1024] = "";
+    cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 1024);
+    buffer[cbBytesRet] = '\0';
+
+    CStringA strMsg(buffer);
+
+    // test for errors and get out if they occurred
+    if (cbBytesRet == SOCKET_ERROR || cbBytesRet == 0)
+    {
+        int iErr = ::GetLastError();
+        TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
+            "\tNumber of Bytes received (zero means connection was closed) = %d\n"
+            "\tGetLastError = %d\n", cbBytesRet, iErr);
+
+        bRet = FALSE;
+        return bRet;
+    }
+
+    msgArr.push_back(strMsg);
+
+    //((CClientApp*)AfxGetApp())->m_ClientSocket.Close();
+    return bRet;
+}
+BOOL CBrowseDirDlg::ReceiveBrowseDir(std::vector<CStringA>& msgArr)
+{
+    if (!msgArr.empty())
+        msgArr.clear();
+
+    BOOL bRet = TRUE;
+    int cbBytesRet;
+    char* buffer = new char[BUFFER_SIZE];
+
+    int timeout = 100; // 1 second timeout
+    ((CClientApp*)AfxGetApp())->m_ClientSocket.SetSockOpt(SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+    cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, (BUFFER_SIZE - 1));
+    buffer[cbBytesRet] = '\0';
+
+    CStringA strMsg(buffer);
+
+    // test for errors and get out if they occurred
+    if (cbBytesRet == 0 || cbBytesRet == SOCKET_ERROR || std::string(buffer) == "Invalid path!")
+    {
+        int iErr = ::GetLastError();
+        TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
+            "\tNumber of Bytes received (zero means connection was closed) = %d\n"
+            "\tGetLastError = %d\n", cbBytesRet, iErr);
+
+        bRet = FALSE;
+        delete[] buffer;
+        return bRet;
+    }
+
+    msgArr.push_back(strMsg);
+
+    delete[] buffer;
+    return bRet;
 }

@@ -283,6 +283,7 @@ void CClassView::OnPaint()
 
 	rectTree.InflateRect(1, 1);
 	dc.Draw3dRect(rectTree, ::GetSysColor(COLOR_3DSHADOW), ::GetSysColor(COLOR_3DSHADOW));
+
 }
 
 void CClassView::OnSetFocus(CWnd* pOldWnd)

@@ -57,8 +57,6 @@ void CShowAppDlg::OnBnClickedKillBtn()
 	msg = msg + " " + cur_Name;
 	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 
-	MessageBox(cur_Name);
-
 	char buffer[1000] = "";
 	int nBytesReceived = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 100000, 0);
 

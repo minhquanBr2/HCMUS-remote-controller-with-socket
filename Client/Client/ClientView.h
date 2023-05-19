@@ -15,7 +15,10 @@
 #define RECV_BUFFER_SIZE    4096
 
 #include "ClientDoc.h"
+#include "ClientView.h"
+#include "MainFrm.h"
 
+#include "ClientDlg.h"
 #include "CapScreenDlg.h"
 #include "KeystrokeDlg.h"
 #include "BrowseDirDlg.h"
@@ -80,6 +83,8 @@ public:
 	void InitButtons();
 	void UpdateButtons();	
 public:
+	// for Connect (0)
+	CClientDlg m_dlgCONN;
 	// for Show App (1)
 	CShowAppDlg m_dlgSAPP;
 	std::string m_strApp;
@@ -94,8 +99,6 @@ public:
 	CKeystrokeDlg m_dlgKSTR;
 	// for Browse Directory (5)
 	CBrowseDirDlg m_dlgBDIR;
-	BOOL ReceiveBrowseDisk(std::vector<CStringA>& msgArr);
-	BOOL ReceiveBrowseDir(std::vector<CStringA>& msgArr);
 };
 
 #ifndef _DEBUG  // debug version in ClientView.cpp

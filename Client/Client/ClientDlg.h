@@ -26,9 +26,5 @@ protected:
 public:
 	CString m_strIPAddress;
 	UINT m_iPort;
-	CString m_strMessage;
-	afx_msg void OnEnChangeMessage();
 	afx_msg void OnBnClickedConnect();
-	afx_msg void OnBnClickedCancel();
-	//afx_msg void OnBnClickedSend();
 };

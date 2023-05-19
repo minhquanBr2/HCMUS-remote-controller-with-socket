@@ -10,17 +10,11 @@
 #include "Client.h"
 #endif
 
-#include "ClientDoc.h"
-#include "ClientView.h"
-#include "ClientDlg.h"
-#include "MainFrm.h"
-
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#define BUFFER_SIZE 65536
 
 
 // CClientView
@@ -81,6 +75,9 @@ void CClientView::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 
+	CRect rectClient;
+	GetClientRect(rectClient);
+	pDC->FillSolidRect(rectClient, RGB(0, 65, 100));
 	// TODO: add draw code for native data here
 }
 
@@ -157,21 +154,32 @@ int CClientView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_button[0].Create("CONNECT", BS_PUSHBUTTON,
-		CRect(300, 100, 580, 150), this, IDC_BN_CONN);
-	m_button[1].Create("SHOW APPLICATIONS", BS_PUSHBUTTON,
-		CRect(600, 100, 880, 150), this, IDC_BN_SAPP);
-	m_button[2].Create("SHOW PROCESSES", BS_PUSHBUTTON,
-		CRect(900, 100, 1180, 150), this, IDC_BN_SPRO);
-	m_button[3].Create("CAPTURE SCREEN", BS_PUSHBUTTON,
-		CRect(300, 300, 580, 350), this, IDC_BN_CSCR);
-	m_button[4].Create("KEYSTROKE", BS_PUSHBUTTON,
-		CRect(600, 300, 880, 350), this, IDC_BN_KSTR);
-	m_button[5].Create("BROWSE DIRECTORY", BS_PUSHBUTTON,
-		CRect(900, 300, 1180, 350), this, IDC_BN_BDIR);
+	//CFont font;
+	//font.CreatePointFont(30, _T("Arial Black"));
 
-	for (int i = 0; i < 6; i++)
+	//LOGFONT lf;
+	//font.GetLogFont(&lf);
+	//lf.lfWeight = FW_BOLD;  // Set font weight to bold
+
+	//CFont boldFont;
+	//boldFont.CreateFontIndirect(&lf);
+
+	m_button[0].Create("CONNECT", BS_DEFPUSHBUTTON | BS_MULTILINE,
+		CRect(50, 50, 200, 150), this, IDC_BN_CONN); 
+	m_button[1].Create("SHOW APPLICATIONS", BS_DEFPUSHBUTTON | BS_MULTILINE,
+		CRect(250, 50, 400, 150), this, IDC_BN_SAPP);  
+	m_button[2].Create("SHOW PROCESSES", BS_DEFPUSHBUTTON | BS_MULTILINE,
+		CRect(450, 50, 600, 150), this, IDC_BN_SPRO);
+	m_button[3].Create("CAPTURE SCREEN", BS_DEFPUSHBUTTON | BS_MULTILINE,
+		CRect(50, 200, 200, 300), this, IDC_BN_CSCR);
+	m_button[4].Create("KEYSTROKE", BS_DEFPUSHBUTTON | BS_MULTILINE,
+		CRect(250, 200, 400, 300), this, IDC_BN_KSTR);
+	m_button[5].Create("BROWSE DIRECTORY", BS_DEFPUSHBUTTON | BS_MULTILINE,
+		CRect(450, 200, 600, 300), this, IDC_BN_BDIR);
+
+	for (int i = 0; i < 6; i++) {
 		m_button[i].ShowWindow(SW_SHOW);
+	}
 	return 0;
 }
 
@@ -200,8 +208,7 @@ void CClientView::OnButtonConnectClicked()
 {
 	if (((CClientApp*)AfxGetApp())->m_isConnected == FALSE)
 	{
-		CClientDlg dlgConnect;
-		dlgConnect.DoModal();
+		m_dlgCONN.DoModal();
 	}
 	else
 	{
@@ -311,8 +318,8 @@ void CClientView::OnButtonCapScreenClicked()
 
 	CString msg(std::string("REQ_CSCR").c_str());
 	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
-	this->ReceiveFile();
-	this->ShowImageDialog();
+	m_dlgCSCR.ReceiveFile();
+	m_dlgCSCR.DoModal();
 
 	Invalidate();
 	UpdateWindow();
@@ -367,9 +374,7 @@ void CClientView::OnButtonBrowseDirClicked()
 	// create a CString object from the UTF-8 encoded string
 	CStringA strMsg(msg);
 	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(strMsg.GetBuffer(strMsg.GetLength()), strMsg.GetLength());
-	this->ReceiveBrowseDisk(m_dlgBDIR.m_msgArr);
-	
-	
+	m_dlgBDIR.ReceiveBrowseDisk(m_dlgBDIR.m_msgArr);
 	m_dlgBDIR.DoModal();
 
 	Invalidate();
@@ -393,190 +398,3 @@ void CClientView::UpdateButtons()
 }
 
 // For Capture Screen (4)
-BOOL CClientView::ReceiveFile()
-{
-	// local variables used in file transfer (declared here to avoid
-	// "goto skips definition"-style compiler errors)
-
-	BOOL bRet = TRUE; // return value
-	// used to monitor the progress of a receive operation
-	int dataLength, cbBytesRet, cbLeftToReceive;
-	// pointer to buffer for receiving data
-	// (memory is allocated after obtaining file size)
-	BYTE* recdData = NULL;
-
-	CFile destFile;
-	CFileException fe;
-	BOOL bFileIsOpen = FALSE;
-
-	// open/create target file that receives the transferred data
-
-	if (!(bFileIsOpen = destFile.Open("screenshot.bmp", CFile::modeCreate |
-		CFile::modeWrite | CFile::typeBinary, &fe)))
-	{
-		TCHAR strCause[256];
-		fe.GetErrorMessage(strCause, 255);
-		TRACE("GetFileFromRemoteSender encountered an error while opening the local file\n"
-			"\tFile name = %s\n\tCause = %s\n\tm_cause = %d\n\tm_IOsError = %d\n",
-			fe.m_strFileName, strCause, fe.m_cause, fe.m_lOsError);
-
-		/* you should handle the error here */
-
-		bRet = FALSE;
-		goto PreReturnCleanup;
-	}
-
-
-	// get the file's size first
-	cbLeftToReceive = sizeof(dataLength);
-
-	do
-	{
-		BYTE* bp = (BYTE*)(&dataLength) + sizeof(dataLength) - cbLeftToReceive;
-		cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(bp, cbLeftToReceive);
-
-		// test for errors and get out if they occurred
-		if (cbBytesRet == SOCKET_ERROR || cbBytesRet == 0)
-		{
-			int iErr = ::GetLastError();
-			TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
-				"\tNumber of Bytes received (zero means connection was closed) = %d\n"
-				"\tGetLastError = %d\n", cbBytesRet, iErr);
-
-			/* you should handle the error here */
-
-			bRet = FALSE;
-			goto PreReturnCleanup;
-		}
-
-		// good data was retrieved, so accumulate
-		// it with already-received data
-		cbLeftToReceive -= cbBytesRet;
-
-	} while (cbLeftToReceive > 0);
-
-	dataLength = ntohl(dataLength);
-
-	// now get the file in RECV_BUFFER_SIZE chunks at a time
-
-	recdData = new byte[RECV_BUFFER_SIZE];
-	cbLeftToReceive = dataLength;
-
-	do
-	{
-		int iiGet, iiRecd;
-
-		iiGet = (cbLeftToReceive < RECV_BUFFER_SIZE) ?
-			cbLeftToReceive : RECV_BUFFER_SIZE;
-		iiRecd = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(recdData, iiGet);
-
-		// test for errors and get out if they occurred
-		if (iiRecd == SOCKET_ERROR || iiRecd == 0)
-		{
-			int iErr = ::GetLastError();
-			TRACE("GetFileFromRemoteSite returned a socket error while getting chunked file data\n"
-				"\tNumber of Bytes received (zero means connection was closed) = %d\n"
-				"\tGetLastError = %d\n", iiRecd, iErr);
-
-			/* you should handle the error here */
-
-			bRet = FALSE;
-			goto PreReturnCleanup;
-		}
-
-		// good data was retrieved, so accumulate
-		// it with already-received data
-
-		destFile.Write(recdData, iiRecd); // Write it
-		cbLeftToReceive -= iiRecd;
-
-	} while (cbLeftToReceive > 0);
-
-PreReturnCleanup: // labelled "goto" destination
-
-	// free allocated memory
-	// if we got here from a goto that skipped allocation,
-	// delete of NULL pointer
-	// is permissible under C++ standard and is harmless
-	delete[] recdData;
-
-	if (bFileIsOpen)
-		destFile.Close();
-	// only close file if it's open (open might have failed above)
-
-	((CClientApp*)AfxGetApp())->m_ClientSocket.Close();
-
-	return bRet;
-}
-void CClientView::ShowImageDialog()
-{
-	m_dlgCSCR.DoModal();
-}
-
-// For Browse Directory (6)
-BOOL CClientView::ReceiveBrowseDisk(std::vector<CStringA>& msgArr)
-{
-	if (!msgArr.empty())
-		msgArr.clear();
-
-	BOOL bRet = TRUE; 
-	int cbBytesRet;
-
-	char buffer[1024] = "";
-	cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, 1024);
-	buffer[cbBytesRet] = '\0';
-
-	CStringA strMsg(buffer);
-
-	// test for errors and get out if they occurred
-	if (cbBytesRet == SOCKET_ERROR || cbBytesRet == 0)
-	{
-		int iErr = ::GetLastError();
-		TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
-			"\tNumber of Bytes received (zero means connection was closed) = %d\n"
-			"\tGetLastError = %d\n", cbBytesRet, iErr);
-
-		bRet = FALSE;
-		return bRet;
-	}
-
-	msgArr.push_back(strMsg);
-
-	//((CClientApp*)AfxGetApp())->m_ClientSocket.Close();
-	return bRet;
-}
-BOOL CClientView::ReceiveBrowseDir(std::vector<CStringA>& msgArr)
-{
-	if (!msgArr.empty())
-		msgArr.clear();
-
-	BOOL bRet = TRUE;
-	int cbBytesRet;
-	char* buffer = new char[BUFFER_SIZE];
-
-	int timeout = 100; // 1 second timeout
-	((CClientApp*)AfxGetApp())->m_ClientSocket.SetSockOpt(SO_RCVTIMEO, &timeout, sizeof(timeout));
-
-	cbBytesRet = ((CClientApp*)AfxGetApp())->m_ClientSocket.Receive(buffer, (BUFFER_SIZE - 1));
-	buffer[cbBytesRet] = '\0';
-
-	CStringA strMsg(buffer);
-
-	// test for errors and get out if they occurred
-	if (cbBytesRet == 0 || cbBytesRet == SOCKET_ERROR || std::string(buffer) == "Invalid path!")
-	{
-		int iErr = ::GetLastError();
-		TRACE("GetFileFromRemoteSite returned a socket error while getting file length\n"
-			"\tNumber of Bytes received (zero means connection was closed) = %d\n"
-			"\tGetLastError = %d\n", cbBytesRet, iErr);
-
-		bRet = FALSE;
-		delete[] buffer;
-		return bRet;
-	}
-
-	msgArr.push_back(strMsg);
-	
-	delete[] buffer;
-	return bRet;
-}

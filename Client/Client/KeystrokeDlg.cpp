@@ -32,6 +32,7 @@ void CKeystrokeDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CKeystrokeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BN_KSTR_HOOK, &CKeystrokeDlg::OnBnClickedBnKstrHook)
 	ON_BN_CLICKED(IDC_BN_KSTR_UNHK, &CKeystrokeDlg::OnBnClickedBnKstrUnhk)
+	ON_EN_CHANGE(IDC_EDIT_KEYSTROKE, &CKeystrokeDlg::OnEnChangeEditKeystroke)
 END_MESSAGE_MAP()
 
 
@@ -55,22 +56,10 @@ void CKeystrokeDlg::OnBnClickedBnKstrUnhk()
 BOOL CKeystrokeDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	m_isHooked = TRUE;
-
-	// Get a pointer to the edit control
-	CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_KEYSTROKE);
-
-	// Set the edit control to be a multiline edit control
-	pEdit->ModifyStyle(0, ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_MULTILINE);
-
-	// Select the entire text in the edit control
-	pEdit->SetSel(0, -1);
-
-	// Scroll the text into view
-	pEdit->LineScroll(pEdit->GetFirstVisibleLine());
+	m_isHooked = TRUE;	
 
 	// Get the current font object of the edit control
-	CFont* pFont = pEdit->GetFont();
+	CFont* pFont = m_strDisplay.GetFont();
 
 	// Get the LOGFONT structure of the current font object
 	LOGFONT lf;
@@ -84,7 +73,7 @@ BOOL CKeystrokeDlg::OnInitDialog()
 	font.CreateFontIndirect(&lf);
 
 	// Set the new font for the edit control
-	pEdit->SetFont(&font);
+	m_strDisplay.SetFont(&font);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -105,4 +94,11 @@ void CKeystrokeDlg::OnOK()
 	((CClientApp*)AfxGetApp())->m_ClientSocket.Send(msg.GetBuffer(msg.GetLength()), msg.GetLength());
 	m_isHooked = FALSE;
 	CDialogEx::OnCancel();
+}
+
+
+void CKeystrokeDlg::OnEnChangeEditKeystroke()
+{
+	int numLines = m_strDisplay.GetLineCount();
+	m_strDisplay.LineScroll(numLines);
 }

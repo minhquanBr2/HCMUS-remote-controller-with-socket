@@ -34,4 +34,6 @@ public:
 	CEdit m_strDisplay;
 	std::vector<CStringA> m_msgArr;
 	afx_msg void OnBnClickedBtnBack();
+	BOOL ReceiveBrowseDisk(std::vector<CStringA>& msgArr);
+	BOOL ReceiveBrowseDir(std::vector<CStringA>& msgArr);
 };

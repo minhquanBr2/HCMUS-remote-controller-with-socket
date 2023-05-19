@@ -17,6 +17,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
+	CBitmap m_backgroundImage;
 
 // Operations
 public:

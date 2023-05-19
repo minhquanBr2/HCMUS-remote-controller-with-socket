@@ -31,4 +31,5 @@ public:
 	virtual BOOL OnInitDialog();
 	virtual void OnCancel();
 	virtual void OnOK();
+	afx_msg void OnEnChangeEditKeystroke();
 };

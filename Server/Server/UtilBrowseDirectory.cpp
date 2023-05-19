@@ -91,7 +91,6 @@ BOOL BrowseDir(CStringW lpPath, std::vector<CStringW>& dirList)
             // Add folder info to dirList
             if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
             {
-                CStringW sizeW(L"BBB", 3);
                 CStringW msg = strFileNameW + L"\t" + dateModifiedW + L"\t---";
                 dirList.push_back(msg);
             }

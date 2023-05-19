@@ -98,6 +98,8 @@
 #define IDD_INP_PRO_NAME_DLG            323
 #define IDD_CInpAppNameDlg              324
 #define IDD_INP_APP_NAME_DLG            324
+#define IDB_BITMAP1                     330
+#define IDB_BACKGROUND_IMAGE            330
 #define IDC_CONNECT                     1001
 #define IDC_IPADDRESS                   1002
 #define IDC_PORT                        1003
@@ -136,7 +138,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        329
+#define _APS_NEXT_RESOURCE_VALUE        331
 #define _APS_NEXT_COMMAND_VALUE         32772
 #define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           325
