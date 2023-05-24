@@ -158,11 +158,15 @@ int CClientView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//font.CreatePointFont(30, _T("Arial Black"));
 
 	//LOGFONT lf;
-	//font.GetLogFont(&lf);
-	//lf.lfWeight = FW_BOLD;  // Set font weight to bold
+	//// clear out structure
+	//memset(&lf, 0, sizeof(LOGFONT));
+	//// request a 12-pixel-height font
+	//lf.lfHeight = 12;
+	//// request a face name "Arial"
+	//_tcsncpy_s(lf.lfFaceName, LF_FACESIZE, _T("Arial"), 50);
 
-	//CFont boldFont;
-	//boldFont.CreateFontIndirect(&lf);
+	//CFont font1;
+	//font1.CreateFontIndirect(&lf);  // create the font
 
 	m_button[0].Create("CONNECT", BS_DEFPUSHBUTTON | BS_MULTILINE,
 		CRect(50, 50, 200, 150), this, IDC_BN_CONN); 

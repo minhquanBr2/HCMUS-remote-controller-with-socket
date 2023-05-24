@@ -25,8 +25,31 @@ void CServerSocket::OnAccept(int nErrorCode)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	// Accepting incoming connections	
-	// AfxMessageBox("Client has successfully connected!");
-	Accept(m_ReceivingSocket);
+	//Accept(m_ReceivingSocket);
+
+
+    if (Accept(m_ReceivingSocket))
+    {
+        // Client connected successfully
+        CString clientAddress;
+        UINT clientPort;
+
+        // Get the client's IP address and port
+        m_ReceivingSocket.GetPeerName(clientAddress, clientPort);
+
+        // Convert the IP address to string
+        CString ipAddress;
+        if (clientAddress.GetLength() == sizeof(SOCKADDR_IN))
+        {
+            sockaddr_in* pSockAddr = reinterpret_cast<sockaddr_in*>(clientAddress.GetBuffer());
+            ipAddress = inet_ntoa(pSockAddr->sin_addr);
+        }
+
+        // Output the client's IP address and port
+        std::string connected_msg = "Client connected from " + std::string(clientAddress) + ":" + std::to_string(clientPort);
+        AfxMessageBox(connected_msg.c_str());
+        //TRACE("Client connected from %s:%d\n", ipAddress, clientPort);
+    }
 	CSocket::OnAccept(nErrorCode);
 }
 

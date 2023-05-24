@@ -154,7 +154,6 @@ void CBrowseDirDlg::OnListCtrlClick(NMHDR* pNMHDR, LRESULT* pResult)
 
             m_listCtrl.DeleteAllItems();
 
-
             CStringW delimiterOut(L"\n"); 
             CStringW tokenOut; 
             int startOut = 0; 

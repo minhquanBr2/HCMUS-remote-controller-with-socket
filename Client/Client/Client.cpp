@@ -107,6 +107,8 @@ BOOL CClientApp::InitInstance()
 	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
 	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
 
+	// Set the visual manager to Office 2007 style
+	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerOffice2007));
 
 	InitContextMenuManager();
 
@@ -144,6 +146,7 @@ BOOL CClientApp::InitInstance()
 
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->SetMenu(NULL);
+	m_pMainWnd->SetWindowPos(NULL, 0, 0, 670, 400, SWP_NOMOVE);
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->SetWindowText("Client");
 	m_pMainWnd->UpdateWindow();

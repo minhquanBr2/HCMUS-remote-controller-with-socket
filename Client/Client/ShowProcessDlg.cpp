@@ -12,7 +12,7 @@
 IMPLEMENT_DYNAMIC(CShowProcessDlg, CDialogEx)
 
 CShowProcessDlg::CShowProcessDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_SPRO, pParent) {}
+	: CDialogEx(IDD_SPRO1, pParent) {}
 
 CShowProcessDlg::~CShowProcessDlg()
 {
@@ -113,7 +113,7 @@ BOOL CShowProcessDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	m_listCtrl.SubclassDlgItem(IDD_SPRO, this);
+	m_listCtrl.SubclassDlgItem(IDD_SPRO1, this);
 	m_listCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 
 	m_listCtrl.InsertColumn(0, _T("Process Name"), LVCFMT_LEFT, 300);

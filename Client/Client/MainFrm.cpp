@@ -55,15 +55,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWndEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	CPaintDC dc(this);
-	CDC memDC;
-	memDC.CreateCompatibleDC(&dc);
-	CBitmap* pOldBitmap = memDC.SelectObject(&m_backgroundImage);
-	CRect clientRect;
-	GetClientRect(&clientRect);
-	dc.BitBlt(0, 0, clientRect.Width(), clientRect.Height(), &memDC, 0, 0, SRCCOPY);
-	memDC.SelectObject(pOldBitmap);
-
 	BOOL bNameValid;
 
 	//if (!m_wndMenuBar.Create(this))
@@ -193,7 +184,6 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 		return FALSE;
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
-
 	return TRUE;
 }
 
