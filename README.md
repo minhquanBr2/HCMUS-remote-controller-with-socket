@@ -8,3 +8,7 @@ The application allows users (using a client host) to remotely control a compute
 - Capture the screen of the server machine.
 - Capture key presses on the server machine.
 - Browse the directory tree on the server machine.
+
+In order to run this application directly, users only need to download either of 2 files:
+- Server/x64/Debug/Server.exe
+- Client/x64/Debug/Client.exe
