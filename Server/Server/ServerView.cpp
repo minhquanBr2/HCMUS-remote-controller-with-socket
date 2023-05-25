@@ -70,6 +70,10 @@ void CServerView::OnDraw(CDC* pDC)
 		top += 30;
 		bottom += 30;
 	}
+
+	CRect rectClient;
+	GetClientRect(rectClient);
+	pDC->FillSolidRect(rectClient, RGB(0, 65, 100));
 	if (!pDoc)
 		return;
 

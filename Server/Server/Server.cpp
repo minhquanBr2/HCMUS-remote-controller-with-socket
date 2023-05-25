@@ -145,6 +145,7 @@ BOOL CServerApp::InitInstance()
 	m_ServerSocket.Listen();
 
 	// The one and only window has been initialized, so show and update it
+	m_pMainWnd->SetWindowPos(NULL, 0, 0, 670, 400, SWP_NOMOVE);
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->SetWindowText("Server");
 	m_pMainWnd->UpdateWindow();
