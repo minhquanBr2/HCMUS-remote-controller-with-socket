@@ -9,3 +9,5 @@
 /Client/Client/x64/
 /Client/Client/Debug/
 *.png
+*.bmp
+*.pdb
